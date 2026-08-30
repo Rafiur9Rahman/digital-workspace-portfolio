@@ -1,0 +1,41 @@
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
+import { MenuBar } from './MenuBar'
+import { Dock } from './Dock'
+import { Launcher } from './Launcher'
+import { Window } from './Window'
+import { useWindows } from '../store/windows'
+
+export function Desktop() {
+  const windows = useWindows((s) => s.windows)
+  const areaRef = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState({ w: 1200, h: 800 })
+
+  useEffect(() => {
+    const measure = () => {
+      const el = areaRef.current
+      if (el) setSize({ w: el.clientWidth, h: el.clientHeight })
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(1200px_600px_at_70%_-10%,#1b2a55_0%,#0b1020_60%)]">
+      <MenuBar />
+
+      {/* Window area sits between menu bar and screen bottom */}
+      <div ref={areaRef} className="absolute inset-x-0 bottom-0 top-8">
+        {windows.every((w) => w.minimized) && <Launcher />}
+        <AnimatePresence>
+          {windows.map((win) => (
+            <Window key={win.id} win={win} deskW={size.w} deskH={size.h} />
+          ))}
+        </AnimatePresence>
+      </div>
+
+      <Dock />
+    </div>
+  )
+}
