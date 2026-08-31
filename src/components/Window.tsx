@@ -129,8 +129,6 @@ export function Window({ win, deskW, deskH }: Props) {
   const app = APPS[win.appId]
   const Body = app.component
 
-  if (win.minimized) return null
-
   return (
     <motion.div
       drag={!win.maximized}
@@ -148,10 +146,15 @@ export function Window({ win, deskW, deskH }: Props) {
         move(win.id, x.get(), y.get())
         persist()
       }}
+      aria-hidden={win.minimized || undefined}
       initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={
+        win.minimized
+          ? { opacity: 0, scale: 0.9, transitionEnd: { visibility: 'hidden' } }
+          : { opacity: 1, scale: 1, visibility: 'visible' }
+      }
       exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.14 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
       style={{
         x,
         y,
@@ -161,48 +164,37 @@ export function Window({ win, deskW, deskH }: Props) {
         position: 'absolute',
         top: 0,
         left: 0,
+        pointerEvents: win.minimized ? 'none' : undefined,
       }}
-      className="flex flex-col overflow-hidden rounded-xl border border-white/[0.09] bg-desk-panel shadow-[0_24px_60px_-16px_rgba(0,0,0,0.7)]"
+      className="flex flex-col overflow-hidden rounded-xl border border-white/[0.12] bg-desk-panel shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_2px_8px_rgba(0,0,0,0.4),0_20px_44px_-10px_rgba(0,0,0,0.55),0_44px_90px_-24px_rgba(0,0,0,0.5)]"
     >
       <div
         onPointerDown={(e) => {
           if (!win.maximized) dragControls.start(e)
         }}
         onDoubleClick={() => toggleMaximize(win.id, deskW, deskH)}
-        className="flex h-9 shrink-0 select-none items-center gap-2.5 border-b border-desk-edge bg-gradient-to-b from-desk-panel to-desk-bg/60 px-3"
+        className="flex h-9 shrink-0 select-none items-center gap-2.5 border-b border-black/30 bg-gradient-to-b from-[#1c2540] to-desk-panel px-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
         style={{ cursor: win.maximized ? 'default' : 'grab' }}
       >
         <div className="group/tl flex items-center gap-2">
-          <button
-            aria-label="Close"
-            onClick={() => close(win.id)}
-            className="grid h-3 w-3 place-items-center rounded-full bg-[#ff5f57] text-[7px] font-bold leading-none text-black/50 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.15)] transition hover:brightness-110 active:brightness-90"
-          >
-            <span className="opacity-0 transition-opacity group-hover/tl:opacity-100">
-              ✕
-            </span>
-          </button>
-          <button
-            aria-label="Minimize"
+          <TrafficLight color="red" symbol="✕" label="Close" onClick={() => close(win.id)} />
+          <TrafficLight
+            color="yellow"
+            symbol="−"
+            label="Minimize"
             onClick={() => minimize(win.id)}
-            className="grid h-3 w-3 place-items-center rounded-full bg-[#febc2e] text-[10px] font-bold leading-none text-black/50 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.15)] transition hover:brightness-110 active:brightness-90"
-          >
-            <span className="-mt-px opacity-0 transition-opacity group-hover/tl:opacity-100">
-              −
-            </span>
-          </button>
-          <button
-            aria-label={win.maximized ? 'Restore' : 'Maximize'}
+          />
+          <TrafficLight
+            color="green"
+            symbol={win.maximized ? '−' : '+'}
+            label={win.maximized ? 'Restore' : 'Maximize'}
             onClick={() => toggleMaximize(win.id, deskW, deskH)}
-            className="grid h-3 w-3 place-items-center rounded-full bg-[#28c840] text-[8px] font-bold leading-none text-black/50 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.15)] transition hover:brightness-110 active:brightness-90"
-          >
-            <span className="opacity-0 transition-opacity group-hover/tl:opacity-100">
-              {win.maximized ? '−' : '+'}
-            </span>
-          </button>
+          />
         </div>
 
-        <span className="ml-1 text-[15px] leading-none">{app.icon}</span>
+        <span className="ml-1 text-[15px] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]">
+          {app.icon}
+        </span>
         <span className="truncate text-xs font-medium text-desk-text/85">
           {win.title}
         </span>
@@ -259,5 +251,40 @@ export function Window({ win, deskW, deskH }: Props) {
         </>
       )}
     </motion.div>
+  )
+}
+
+const TL_BG: Record<'red' | 'yellow' | 'green', string> = {
+  red: 'radial-gradient(circle at 32% 28%, #ff9a8f, #ff5f57 55%, #d84036)',
+  yellow: 'radial-gradient(circle at 32% 28%, #ffd67a, #febc2e 55%, #e0991a)',
+  green: 'radial-gradient(circle at 32% 28%, #86e88f, #28c840 55%, #16a02f)',
+}
+
+function TrafficLight({
+  color,
+  symbol,
+  label,
+  onClick,
+}: {
+  color: 'red' | 'yellow' | 'green'
+  symbol: string
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      aria-label={label}
+      onClick={onClick}
+      className="grid h-3 w-3 place-items-center rounded-full leading-none text-black/45 transition-transform active:scale-90"
+      style={{
+        background: TL_BG[color],
+        boxShadow:
+          'inset 0 1px 1.5px rgba(255,255,255,0.6), inset 0 -1.5px 2px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.4)',
+      }}
+    >
+      <span className="text-[8px] font-bold opacity-0 transition-opacity group-hover/tl:opacity-100">
+        {symbol}
+      </span>
+    </button>
   )
 }

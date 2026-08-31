@@ -24,18 +24,20 @@ export function Desktop() {
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(1200px_600px_at_70%_-10%,#1b2a55_0%,#0b1020_60%)]">
+      {/* depth vignette on the wallpaper so windows read as floating above it */}
+      <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_240px_70px_rgba(0,0,0,0.5)]" />
       <MenuBar />
 
       {/* Window area sits between menu bar and screen bottom */}
       <div ref={areaRef} className="absolute inset-x-0 bottom-0 top-8">
         <Launcher />
         <DesktopIcons deskW={size.w} deskH={size.h} />
+        {/* Windows stay mounted while minimised (Window.tsx hides them) so their
+            state — a running emulator, terminal history — survives. */}
         <AnimatePresence>
-          {windows
-            .filter((win) => !win.minimized)
-            .map((win) => (
-              <Window key={win.id} win={win} deskW={size.w} deskH={size.h} />
-            ))}
+          {windows.map((win) => (
+            <Window key={win.id} win={win} deskW={size.w} deskH={size.h} />
+          ))}
         </AnimatePresence>
       </div>
 

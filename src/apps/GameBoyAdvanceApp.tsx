@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { loadLastRom, saveLastRom } from '../lib/gbaStorage'
+import { useWindows } from '../store/windows'
 
 /* Game Boy Advance — EmulatorJS (mGBA core), fully self-hosted from
    /emulatorjs (see scripts/setup-emulator.mjs). The ROM is read client-side and
@@ -24,6 +25,8 @@ const DATA_PATH = '/emulatorjs/data/'
 interface EJSInstance {
   on?: (event: string, cb: () => void) => void
   callEvent?: (event: string) => void
+  pause?: () => void
+  play?: () => void
   gameManager?: { saveSaveFiles?: () => void } | null
   saveSaveInterval?: ReturnType<typeof setInterval> | null
   started?: boolean
@@ -193,6 +196,11 @@ export function GameBoyAdvanceApp() {
   // mount → unmount → mount fires two) bails after its awaits instead of
   // constructing a second emulator on the same host.
   const bootEpochRef = useRef(0)
+  // The window stays mounted while minimised (so the game isn't lost) — pause
+  // the core meanwhile so it isn't running (and making sound) off-screen.
+  const minimized = useWindows(
+    (s) => s.windows.find((w) => w.appId === 'gba')?.minimized ?? false,
+  )
 
   function teardown() {
     destroyEmulator()
@@ -311,6 +319,17 @@ export function GameBoyAdvanceApp() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Pause the running core while the window is minimised; resume on restore.
+  useEffect(() => {
+    if (phase !== 'running') return
+    try {
+      if (minimized) liveEmulator?.pause?.()
+      else liveEmulator?.play?.()
+    } catch {
+      /* core not ready — ignore */
+    }
+  }, [minimized, phase])
 
   // Mirror WASD onto the D-pad, but only while the emulator is focused so WASD
   // stays free everywhere else.
