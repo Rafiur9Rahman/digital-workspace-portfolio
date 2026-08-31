@@ -162,41 +162,50 @@ export function Window({ win, deskW, deskH }: Props) {
         top: 0,
         left: 0,
       }}
-      className="flex flex-col overflow-hidden rounded-xl border border-desk-edge bg-desk-panel shadow-2xl shadow-black/50"
+      className="flex flex-col overflow-hidden rounded-xl border border-white/[0.09] bg-desk-panel shadow-[0_24px_60px_-16px_rgba(0,0,0,0.7)]"
     >
       <div
         onPointerDown={(e) => {
           if (!win.maximized) dragControls.start(e)
         }}
         onDoubleClick={() => toggleMaximize(win.id, deskW, deskH)}
-        className="flex h-9 shrink-0 select-none items-center gap-2 border-b border-desk-edge bg-desk-bg/60 px-3"
+        className="flex h-9 shrink-0 select-none items-center gap-2.5 border-b border-desk-edge bg-gradient-to-b from-desk-panel to-desk-bg/60 px-3"
         style={{ cursor: win.maximized ? 'default' : 'grab' }}
       >
-        <span className="text-sm">{app.icon}</span>
-        <span className="text-xs font-medium text-desk-muted">{win.title}</span>
-        <div className="ml-auto flex items-center gap-1.5">
-          <button
-            aria-label="Minimize"
-            onClick={() => minimize(win.id)}
-            className="grid h-4 w-4 place-items-center rounded-full bg-yellow-500/80 text-[9px] text-black/70 hover:bg-yellow-400"
-          >
-            –
-          </button>
-          <button
-            aria-label="Maximize"
-            onClick={() => toggleMaximize(win.id, deskW, deskH)}
-            className="grid h-4 w-4 place-items-center rounded-full bg-green-500/80 text-[9px] text-black/70 hover:bg-green-400"
-          >
-            ⤢
-          </button>
+        <div className="group/tl flex items-center gap-2">
           <button
             aria-label="Close"
             onClick={() => close(win.id)}
-            className="grid h-4 w-4 place-items-center rounded-full bg-red-500/80 text-[9px] text-black/70 hover:bg-red-400"
+            className="grid h-3 w-3 place-items-center rounded-full bg-[#ff5f57] text-[7px] font-bold leading-none text-black/50 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.15)] transition hover:brightness-110 active:brightness-90"
           >
-            ✕
+            <span className="opacity-0 transition-opacity group-hover/tl:opacity-100">
+              ✕
+            </span>
+          </button>
+          <button
+            aria-label="Minimize"
+            onClick={() => minimize(win.id)}
+            className="grid h-3 w-3 place-items-center rounded-full bg-[#febc2e] text-[10px] font-bold leading-none text-black/50 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.15)] transition hover:brightness-110 active:brightness-90"
+          >
+            <span className="-mt-px opacity-0 transition-opacity group-hover/tl:opacity-100">
+              −
+            </span>
+          </button>
+          <button
+            aria-label={win.maximized ? 'Restore' : 'Maximize'}
+            onClick={() => toggleMaximize(win.id, deskW, deskH)}
+            className="grid h-3 w-3 place-items-center rounded-full bg-[#28c840] text-[8px] font-bold leading-none text-black/50 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.15)] transition hover:brightness-110 active:brightness-90"
+          >
+            <span className="opacity-0 transition-opacity group-hover/tl:opacity-100">
+              {win.maximized ? '−' : '+'}
+            </span>
           </button>
         </div>
+
+        <span className="ml-1 text-[15px] leading-none">{app.icon}</span>
+        <span className="truncate text-xs font-medium text-desk-text/85">
+          {win.title}
+        </span>
       </div>
 
       <div className="desk-scroll min-h-0 flex-1 overflow-auto">

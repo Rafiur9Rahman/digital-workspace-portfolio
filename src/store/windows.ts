@@ -24,6 +24,7 @@ interface WindowStore {
   closeAll: () => void
   focus: (id: string) => void
   minimize: (id: string) => void
+  restore: (id: string) => void
   toggleMaximize: (id: string, deskW: number, deskH: number) => void
   move: (id: string, x: number, y: number) => void
   resize: (id: string, width: number, height: number) => void
@@ -91,6 +92,18 @@ export const useWindows = create<WindowStore>((set, get) => ({
         w.id === id ? { ...w, minimized: true } : w,
       ),
     })),
+
+  // Un-minimize and raise to the front (used by the dock).
+  restore: (id) =>
+    set((s) => {
+      const z = s.topZ + 1
+      return {
+        topZ: z,
+        windows: s.windows.map((w) =>
+          w.id === id ? { ...w, minimized: false, z } : w,
+        ),
+      }
+    }),
 
   toggleMaximize: (id, deskW, deskH) =>
     set((s) => ({

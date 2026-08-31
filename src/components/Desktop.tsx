@@ -31,9 +31,11 @@ export function Desktop() {
         <Launcher />
         <DesktopIcons deskW={size.w} deskH={size.h} />
         <AnimatePresence>
-          {windows.map((win) => (
-            <Window key={win.id} win={win} deskW={size.w} deskH={size.h} />
-          ))}
+          {windows
+            .filter((win) => !win.minimized)
+            .map((win) => (
+              <Window key={win.id} win={win} deskW={size.w} deskH={size.h} />
+            ))}
         </AnimatePresence>
       </div>
 

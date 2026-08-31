@@ -1,32 +1,91 @@
-import { APP_LIST } from '../data/apps'
+import { APP_LIST, APPS } from '../data/apps'
 import { useWindows } from '../store/windows'
 
 export function Dock() {
-  const { windows, openApp, minimize } = useWindows()
+  const windows = useWindows((s) => s.windows)
+  const openApp = useWindows((s) => s.openApp)
+  const minimize = useWindows((s) => s.minimize)
+  const restore = useWindows((s) => s.restore)
+
+  const minimized = windows.filter((w) => w.minimized)
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex justify-center pb-3">
-      <div className="pointer-events-auto flex items-end gap-1.5 rounded-2xl border border-desk-edge bg-desk-panel/80 px-2.5 py-2 backdrop-blur">
+      <div className="pointer-events-auto flex items-center gap-1 rounded-2xl border border-white/10 bg-desk-panel/70 p-2 shadow-[0_16px_44px_-12px_rgba(0,0,0,0.7)] backdrop-blur-xl">
         {APP_LIST.map((app) => {
-          const open = windows.find((w) => w.appId === app.id)
+          const win = windows.find((w) => w.appId === app.id)
           return (
-            <button
+            <DockButton
               key={app.id}
+              icon={app.icon}
+              label={app.title}
+              running={Boolean(win)}
+              dim={win?.minimized}
               onClick={() => {
-                if (open && !open.minimized) minimize(open.id)
-                else openApp(app.id) // opens, or re-focuses + un-minimizes if already open
+                if (win && !win.minimized) minimize(win.id)
+                else openApp(app.id)
               }}
-              title={app.title}
-              className="group relative flex h-11 w-11 items-center justify-center rounded-xl bg-desk-bg/70 text-lg transition hover:-translate-y-1 hover:bg-desk-edge"
-            >
-              <span>{app.icon}</span>
-              {open && (
-                <span className="absolute -bottom-1 h-1 w-1 rounded-full bg-desk-accent" />
-              )}
-            </button>
+            />
           )
         })}
+
+        {minimized.length > 0 && (
+          <>
+            <span className="mx-1.5 h-9 w-px bg-white/10" />
+            {minimized.map((win) => (
+              <DockButton
+                key={win.id}
+                icon={APPS[win.appId].icon}
+                label={win.title}
+                running
+                dim
+                onClick={() => restore(win.id)}
+              />
+            ))}
+          </>
+        )}
       </div>
     </div>
+  )
+}
+
+function DockButton({
+  icon,
+  label,
+  running,
+  dim,
+  onClick,
+}: {
+  icon: string
+  label: string
+  running: boolean
+  dim?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      className="group relative flex h-12 w-12 items-center justify-center rounded-xl transition-colors hover:bg-white/5"
+    >
+      <span className="pointer-events-none absolute -top-9 whitespace-nowrap rounded-md border border-white/10 bg-desk-panel px-2 py-1 text-[11px] text-desk-text opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+        {label}
+      </span>
+      <span
+        className={`text-2xl leading-none transition-transform duration-150 group-hover:-translate-y-1 group-hover:scale-110 ${
+          dim ? 'opacity-60' : ''
+        }`}
+      >
+        {icon}
+      </span>
+      {running && (
+        <span
+          className={`absolute bottom-1 h-1 w-1 rounded-full ${
+            dim ? 'bg-desk-muted' : 'bg-desk-accent'
+          }`}
+        />
+      )}
+    </button>
   )
 }

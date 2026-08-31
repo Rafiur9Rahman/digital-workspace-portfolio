@@ -37,6 +37,19 @@ describe('useWindows', () => {
     expect(state().windows[0].z).toBe(maxZ())
   })
 
+  it('restore un-minimizes a window and raises it to the front', () => {
+    state().openApp('terminal')
+    state().openApp('projects')
+    const id = state().windows.find((w) => w.appId === 'terminal')!.id
+    state().minimize(id)
+    expect(state().windows.find((w) => w.id === id)!.minimized).toBe(true)
+
+    state().restore(id)
+    const win = state().windows.find((w) => w.id === id)!
+    expect(win.minimized).toBe(false)
+    expect(win.z).toBe(maxZ())
+  })
+
   it('focus raises a window above the rest', () => {
     state().openApp('about')
     state().openApp('projects')
