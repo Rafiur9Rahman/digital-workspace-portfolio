@@ -15,12 +15,6 @@ import {
   type WorkspaceGraph,
 } from '../lib/workspaceGraph'
 import { forceLayout } from '../lib/graphLayout'
-import {
-  computeViewSet,
-  VIEW_ALIASES,
-  VIEWS,
-  type ViewId,
-} from '../lib/workspaceViews'
 import { certifications, experience, projects } from '../data/content'
 import type { AppId } from '../data/appMeta'
 import { useWindows } from '../store/windows'
@@ -142,23 +136,20 @@ export function WorkspaceMapApp() {
   const [trail, setTrail] = useState<string[]>([])
   const focusId = trail.length ? trail[trail.length - 1] : null
 
-  const [view, setView] = useState<ViewId>('all')
   const [cats, setCats] = useState<Set<NodeType>>(
     () => new Set(CATEGORY_FILTERS),
   )
 
-  const viewSet = useMemo(() => computeViewSet(view, g), [view, g])
-
-  /** Overview visible set: base graph, narrowed by the view and the filters. */
+  /** Overview visible set: base graph, narrowed by the category filters. */
   const activeVisible = useMemo(() => {
     const s = new Set<string>()
     for (const n of g.nodes) {
-      if (!baseVisible.has(n.id) || !viewSet.has(n.id)) continue
+      if (!baseVisible.has(n.id)) continue
       if (n.type !== 'profile' && !cats.has(n.type)) continue
       s.add(n.id)
     }
     return s
-  }, [g, baseVisible, viewSet, cats])
+  }, [g, baseVisible, cats])
 
   // Re-run the layout whenever the visible set changes; nodes glide to place.
   const overviewPos = useMemo(() => {
@@ -280,16 +271,12 @@ export function WorkspaceMapApp() {
     return () => window.removeEventListener('keydown', onEsc)
   }, [focusId])
 
-  // `map <topic>` from the terminal: switch to a view, or focus a node.
+  // `map <topic>` from the terminal: focus the node that best matches.
   useEffect(() => {
     if (focusRequest?.appId !== 'map') return
     const raw = focusRequest.ref.trim().toLowerCase()
     clearFocusRequest()
     if (!raw) return
-    if (VIEW_ALIASES[raw]) {
-      setView(VIEW_ALIASES[raw])
-      return
-    }
     const hit =
       g.nodes.find((n) => n.label.toLowerCase() === raw) ??
       g.nodes.find((n) => n.label.toLowerCase().includes(raw)) ??
@@ -377,24 +364,10 @@ export function WorkspaceMapApp() {
           mobile ? 'gap-x-1.5 gap-y-1.5' : 'gap-x-3 gap-y-2'
         }`}
       >
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           <span className="mr-1 text-[9px] uppercase tracking-[0.2em] text-desk-muted">
-            View
+            Show
           </span>
-          {VIEWS.map((v) => (
-            <ToolbarChip
-              key={v.id}
-              active={view === v.id}
-              onClick={() => setView(v.id)}
-            >
-              {v.label}
-            </ToolbarChip>
-          ))}
-        </div>
-
-        {!mobile && <span className="h-4 w-px bg-desk-edge" />}
-
-        <div className="flex items-center gap-1">
           <ToolbarChip active={allCatsOn} onClick={enableAllCats}>
             All
           </ToolbarChip>
