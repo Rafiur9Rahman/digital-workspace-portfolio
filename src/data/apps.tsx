@@ -5,6 +5,7 @@ import { ProjectsApp } from '../apps/ProjectsApp'
 import { AssistantApp } from '../apps/AssistantApp'
 import { TerminalApp } from '../apps/TerminalApp'
 import { FilesApp } from '../apps/FilesApp'
+import { WorkspaceMapApp } from '../apps/WorkspaceMapApp'
 import { ResumeApp } from '../apps/ResumeApp'
 import { PhotoApp } from '../apps/PhotoApp'
 import { ContactApp } from '../apps/ContactApp'
@@ -31,6 +32,7 @@ const meta = (
 export const APPS: Record<AppId, AppDef> = {
   assistant: meta('assistant', AssistantApp, { width: 460, height: 520 }),
   files: meta('files', FilesApp, { width: 560, height: 440 }),
+  map: meta('map', WorkspaceMapApp, { width: 900, height: 620 }),
   projects: meta('projects', ProjectsApp, { width: 640, height: 460 }),
   about: meta('about', AboutApp, { width: 560, height: 480 }),
   terminal: meta('terminal', TerminalApp, { width: 680, height: 460 }),
@@ -45,7 +47,7 @@ export const APPS: Record<AppId, AppDef> = {
 export const APP_LIST: AppDef[] = [
   APPS.assistant,
   APPS.files,
+  APPS.map,
   APPS.projects,
-  APPS.about,
   APPS.terminal,
 ]

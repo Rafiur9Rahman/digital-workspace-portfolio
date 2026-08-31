@@ -14,8 +14,8 @@ interface DeskIcon {
 // Desktop stripped to a single icon for now. To bring an icon back, uncomment
 // its entry here AND its matching position in DEFAULTS below.
 const ICONS: DeskIcon[] = [
+  { id: 'about', label: 'About the Author', glyph: '👤', app: 'about' },
   // { id: 'projects', label: 'Projects', glyph: '📁', app: 'projects' },
-  // { id: 'about', label: 'About Me', glyph: '📁', app: 'about' },
   // { id: 'resume', label: 'resume.pdf', glyph: '📄', app: 'resume' },
   { id: 'images', label: 'Images', glyph: '📁', app: 'images', big: true },
   { id: 'gba', label: 'Game Boy Advance', glyph: '🎮', app: 'gba' },
@@ -28,8 +28,8 @@ const ICONS: DeskIcon[] = [
    nameplate and the dock. Users drag from here and positions are remembered.
    Keep one entry per icon in ICONS. */
 const DEFAULTS: Record<string, { x: number; y: number }> = {
+  about: { x: 0.06, y: 0.1 },
   // projects: { x: 0.05, y: 0.09 },
-  // about: { x: 0.15, y: 0.3 },
   // resume: { x: 0.04, y: 0.52 },
   images: { x: 0.13, y: 0.72 },
   gba: { x: 0.85, y: 0.14 },

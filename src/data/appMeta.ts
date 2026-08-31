@@ -9,6 +9,7 @@ export type AppId =
   | 'assistant'
   | 'terminal'
   | 'files'
+  | 'map'
   | 'resume'
   | 'photo'
   | 'contact'
@@ -19,6 +20,7 @@ export type AppId =
 export const APP_TITLES: Record<AppId, string> = {
   assistant: 'AI Assistant',
   files: 'Files',
+  map: 'Workspace Map',
   projects: 'Projects',
   about: 'About Me',
   terminal: 'Terminal',
@@ -33,6 +35,7 @@ export const APP_TITLES: Record<AppId, string> = {
 export const APP_ICONS: Record<AppId, string> = {
   assistant: '✨',
   files: '📂',
+  map: '🗺️',
   projects: '🗂️',
   about: '👤',
   terminal: '⌨️',
