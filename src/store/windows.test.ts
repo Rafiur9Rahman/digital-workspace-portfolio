@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useWindows } from './windows'
 
-const reset = () => useWindows.setState({ windows: [], topZ: 1 })
+const reset = () =>
+  useWindows.setState({ windows: [], topZ: 1, focusRequest: null })
 const state = () => useWindows.getState()
 const maxZ = () => Math.max(...state().windows.map((w) => w.z))
 
@@ -58,6 +59,26 @@ describe('useWindows', () => {
 
     state().focus(about.id)
     expect(state().windows.find((w) => w.id === about.id)!.z).toBe(maxZ())
+  })
+
+  it('openAppWith opens the app and records a focus request', () => {
+    state().openAppWith('projects', 'analytics-pipeline')
+    expect(state().windows).toHaveLength(1)
+    expect(state().windows[0].appId).toBe('projects')
+    expect(state().focusRequest).toMatchObject({
+      appId: 'projects',
+      ref: 'analytics-pipeline',
+    })
+
+    // a second request for the same app is a fresh object (new nonce)
+    const first = state().focusRequest!
+    state().openAppWith('projects', 'semantic-document-search')
+    expect(state().windows).toHaveLength(1)
+    expect(state().focusRequest!.nonce).not.toBe(first.nonce)
+    expect(state().focusRequest!.ref).toBe('semantic-document-search')
+
+    state().clearFocusRequest()
+    expect(state().focusRequest).toBeNull()
   })
 
   it('close removes the window', () => {

@@ -5,8 +5,12 @@ import {
   type GraphEdge,
   type GraphNode,
   type NodeType,
+  type WorkspaceGraph,
 } from '../lib/workspaceGraph'
 import { forceLayout } from '../lib/graphLayout'
+import { certifications, experience, projects } from '../data/content'
+import type { AppId } from '../data/appMeta'
+import { useWindows } from '../store/windows'
 
 /* Workspace Map.
    Phase 1: static, pannable, zoomable relationship index.
@@ -29,6 +33,30 @@ const TYPE_ORDER: Record<NodeType, number> = {
   skill: 3,
   certification: 4,
 }
+
+const TYPE_LABEL: Record<NodeType, string> = {
+  profile: 'Profile',
+  project: 'Project',
+  skill: 'Skill',
+  experience: 'Experience',
+  certification: 'Certification',
+}
+
+const TYPE_PLURAL: Record<NodeType, string> = {
+  profile: 'Profile',
+  project: 'Projects',
+  skill: 'Skills',
+  experience: 'Experience',
+  certification: 'Certifications',
+}
+
+const CONNECTION_ORDER: NodeType[] = [
+  'project',
+  'skill',
+  'experience',
+  'certification',
+  'profile',
+]
 
 /** Overview visible set: everything except low-signal ad-hoc tech leaves. */
 function isVisible(n: GraphNode): boolean {
@@ -118,6 +146,7 @@ export function WorkspaceMapApp() {
   const movedRef = useRef(false)
   const surfaceRef = useRef<HTMLDivElement>(null)
   const reduce = useReducedMotion()
+  const openAppWith = useWindows((s) => s.openAppWith)
 
   const nbrSet = useMemo(
     () => new Set(focusId ? [...(g.neighbors.get(focusId) ?? [])] : []),
@@ -259,10 +288,11 @@ export function WorkspaceMapApp() {
         </p>
       </header>
 
+      <div className="flex min-h-0 flex-1">
       <div
         ref={surfaceRef}
         tabIndex={0}
-        className="relative flex-1 cursor-grab overflow-hidden outline-none active:cursor-grabbing"
+        className="relative min-w-0 flex-1 cursor-grab overflow-hidden outline-none active:cursor-grabbing"
         onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -417,6 +447,20 @@ export function WorkspaceMapApp() {
         </div>
       </div>
 
+      {focusId && g.byId.has(focusId) && (
+        <aside className="w-64 shrink-0 overflow-hidden border-l border-desk-edge bg-desk-panel">
+          <DetailPanel
+            node={g.byId.get(focusId)!}
+            neighborIds={[...nbrSet]}
+            graph={g}
+            onFocus={focusNode}
+            onOpen={openAppWith}
+            onClose={exitFocus}
+          />
+        </aside>
+      )}
+      </div>
+
       <footer className="border-t border-desk-edge px-4 py-1.5 text-[10px] uppercase tracking-[0.15em] text-desk-muted">
         {focusId
           ? `${g.byId.get(focusId)?.label ?? focusId} • ${nbrSet.size} direct ${
@@ -424,6 +468,185 @@ export function WorkspaceMapApp() {
             }`
           : `${stats.nodes} nodes • ${stats.edges} relationships • ${stats.categories} categories`}
       </footer>
+    </div>
+  )
+}
+
+function groupConnections(ids: string[], graph: WorkspaceGraph) {
+  return CONNECTION_ORDER.map(
+    (type) =>
+      [
+        type,
+        ids
+          .filter((id) => graph.byId.get(id)?.type === type)
+          .sort((a, b) =>
+            (graph.byId.get(a)?.label ?? '').localeCompare(
+              graph.byId.get(b)?.label ?? '',
+            ),
+          ),
+      ] as const,
+  ).filter(([, list]) => list.length > 0)
+}
+
+function DetailPanel({
+  node,
+  neighborIds,
+  graph,
+  onFocus,
+  onOpen,
+  onClose,
+}: {
+  node: GraphNode
+  neighborIds: string[]
+  graph: WorkspaceGraph
+  onFocus: (id: string) => void
+  onOpen: (appId: AppId, ref: string) => void
+  onClose: () => void
+}) {
+  const project =
+    node.type === 'project'
+      ? projects.find((p) => p.slug === node.ref)
+      : undefined
+  const job =
+    node.type === 'experience'
+      ? experience.find((j) => j.company === node.ref)
+      : undefined
+  const cert =
+    node.type === 'certification'
+      ? certifications.find((c) => c.name === node.ref)
+      : undefined
+
+  const groups = groupConnections(neighborIds, graph)
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-start justify-between gap-2 border-b border-desk-edge px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-[9px] uppercase tracking-[0.2em] text-desk-muted">
+            {TYPE_LABEL[node.type]}
+            {node.group ? ` • ${node.group}` : ''}
+          </p>
+          <h3 className="mt-1 text-sm font-semibold text-desk-text">
+            {node.label}
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close detail panel"
+          className="shrink-0 rounded p-0.5 text-desk-muted hover:text-desk-text"
+        >
+          &times;
+        </button>
+      </div>
+
+      <div className="desk-scroll min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3 text-[12px]">
+        {node.description && (
+          <p className="leading-relaxed text-desk-text">{node.description}</p>
+        )}
+
+        {project && (
+          <>
+            <p className="text-[11px] text-desk-muted">
+              {project.role} • {project.period} • difficulty{' '}
+              {project.difficulty}/5
+            </p>
+            <PanelSection title="Tech">
+              <div className="flex flex-wrap gap-1">
+                {project.tech.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded border border-desk-edge bg-desk-bg/60 px-1.5 py-0.5 text-[10px]"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </PanelSection>
+            <PanelSection title="Outcomes">
+              <ul className="list-inside list-disc space-y-1 text-desk-text">
+                {project.outcomes.map((o) => (
+                  <li key={o}>{o}</li>
+                ))}
+              </ul>
+            </PanelSection>
+            <button
+              type="button"
+              onClick={() => onOpen('projects', project.slug)}
+              className="w-full rounded-md bg-desk-accent px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-white hover:brightness-110"
+            >
+              Open project
+            </button>
+          </>
+        )}
+
+        {job && (
+          <>
+            <p className="text-[11px] text-desk-muted">
+              {job.role} • {job.period}
+            </p>
+            <PanelSection title="Highlights">
+              <ul className="list-inside list-disc space-y-1 text-desk-text">
+                {job.highlights.map((h) => (
+                  <li key={h}>{h}</li>
+                ))}
+              </ul>
+            </PanelSection>
+          </>
+        )}
+
+        {cert && (
+          <>
+            <p className="text-[11px] text-desk-muted">
+              {cert.issuer} • {cert.year}
+            </p>
+            {cert.credentialUrl && (
+              <a
+                href={cert.credentialUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[11px] text-desk-accent hover:underline"
+              >
+                View credential
+              </a>
+            )}
+          </>
+        )}
+
+        {groups.map(([type, ids]) => (
+          <PanelSection key={type} title={`${TYPE_PLURAL[type]} (${ids.length})`}>
+            <div className="flex flex-col gap-0.5">
+              {ids.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onFocus(id)}
+                  className="truncate rounded px-1.5 py-1 text-left text-[11px] text-desk-muted hover:bg-desk-edge/40 hover:text-desk-text"
+                >
+                  {graph.byId.get(id)?.label ?? id}
+                </button>
+              ))}
+            </div>
+          </PanelSection>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PanelSection({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <h4 className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-desk-muted">
+        {title}
+      </h4>
+      {children}
     </div>
   )
 }

@@ -16,10 +16,21 @@ export interface WinState {
   restore?: { x: number; y: number; width: number; height: number }
 }
 
+/** A request from one app to open another and point it at a specific record. */
+export interface FocusRequest {
+  appId: AppId
+  ref: string
+  nonce: number
+}
+
 interface WindowStore {
   windows: WinState[]
   topZ: number
+  /** Set by openAppWith, consumed (and cleared) by the target app. */
+  focusRequest: FocusRequest | null
   openApp: (appId: AppId) => void
+  openAppWith: (appId: AppId, ref: string) => void
+  clearFocusRequest: () => void
   close: (id: string) => void
   closeAll: () => void
   focus: (id: string) => void
@@ -31,10 +42,12 @@ interface WindowStore {
 }
 
 let seq = 0
+let focusSeq = 0
 
 export const useWindows = create<WindowStore>((set, get) => ({
   windows: [],
   topZ: 1,
+  focusRequest: null,
 
   openApp: (appId) => {
     const app = APPS[appId]
@@ -71,6 +84,14 @@ export const useWindows = create<WindowStore>((set, get) => ({
       ],
     }))
   },
+
+  // Open (or focus) an app and hand it a record to select on arrival.
+  openAppWith: (appId, ref) => {
+    get().openApp(appId)
+    set({ focusRequest: { appId, ref, nonce: ++focusSeq } })
+  },
+
+  clearFocusRequest: () => set({ focusRequest: null }),
 
   close: (id) =>
     set((s) => ({ windows: s.windows.filter((w) => w.id !== id) })),

@@ -1,8 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { projects } from '../data/content'
+import { useWindows } from '../store/windows'
 
 export function ProjectsApp() {
   const [selected, setSelected] = useState(projects[0].slug)
+  const focusRequest = useWindows((s) => s.focusRequest)
+  const clearFocusRequest = useWindows((s) => s.clearFocusRequest)
+
+  // Jump to the project the Workspace Map (or anything else) asked for.
+  useEffect(() => {
+    if (
+      focusRequest?.appId === 'projects' &&
+      projects.some((p) => p.slug === focusRequest.ref)
+    ) {
+      setSelected(focusRequest.ref)
+      clearFocusRequest()
+    }
+  }, [focusRequest, clearFocusRequest])
+
   const project = projects.find((p) => p.slug === selected)!
 
   return (

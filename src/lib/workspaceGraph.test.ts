@@ -24,6 +24,16 @@ describe('buildWorkspaceGraph', () => {
     for (const c of certifications) expect(g.byId.has(`cert:${slug(c.name)}`)).toBe(true)
   })
 
+  it('carries a ref back to the source record for each typed node', () => {
+    expect(g.byId.get(`project:${projects[0].slug}`)!.ref).toBe(projects[0].slug)
+    expect(g.byId.get(`exp:${slug(experience[0].company)}`)!.ref).toBe(
+      experience[0].company,
+    )
+    expect(g.byId.get(`cert:${slug(certifications[0].name)}`)!.ref).toBe(
+      certifications[0].name,
+    )
+  })
+
   it('auto-links a project to the skills in its tech list', () => {
     const edge = g.edges.find(
       (e) =>

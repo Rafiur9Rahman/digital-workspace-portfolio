@@ -107,6 +107,7 @@ export function buildWorkspaceGraph(): WorkspaceGraph {
       label: job.company,
       type: 'experience',
       description: `${job.role} · ${job.period}`,
+      ref: job.company,
     })
   }
 
@@ -116,6 +117,7 @@ export function buildWorkspaceGraph(): WorkspaceGraph {
       label: c.name,
       type: 'certification',
       description: `${c.issuer} · ${c.year}`,
+      ref: c.name,
     })
   }
 
