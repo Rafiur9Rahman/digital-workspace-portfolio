@@ -21,10 +21,12 @@ interface WindowStore {
   topZ: number
   openApp: (appId: AppId) => void
   close: (id: string) => void
+  closeAll: () => void
   focus: (id: string) => void
   minimize: (id: string) => void
   toggleMaximize: (id: string, deskW: number, deskH: number) => void
   move: (id: string, x: number, y: number) => void
+  resize: (id: string, width: number, height: number) => void
 }
 
 let seq = 0
@@ -72,6 +74,8 @@ export const useWindows = create<WindowStore>((set, get) => ({
   close: (id) =>
     set((s) => ({ windows: s.windows.filter((w) => w.id !== id) })),
 
+  closeAll: () => set({ windows: [] }),
+
   focus: (id) =>
     set((s) => {
       const z = s.topZ + 1
@@ -110,5 +114,10 @@ export const useWindows = create<WindowStore>((set, get) => ({
   move: (id, x, y) =>
     set((s) => ({
       windows: s.windows.map((w) => (w.id === id ? { ...w, x, y } : w)),
+    })),
+
+  resize: (id, width, height) =>
+    set((s) => ({
+      windows: s.windows.map((w) => (w.id === id ? { ...w, width, height } : w)),
     })),
 }))

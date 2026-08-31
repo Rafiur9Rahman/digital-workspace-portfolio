@@ -82,6 +82,20 @@ body {
   opacity: 0.022;
 }
 
+@keyframes party-bit {
+  0% {
+    transform: translateY(10px) scale(0.4) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-130px) scale(1) rotate(160deg);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .boot-drift {
     animation: boot-drift 16s ease-in-out infinite;
@@ -91,5 +105,9 @@ body {
   }
   .boot-pop {
     animation: boot-ready-pop 0.4s ease-out;
+  }
+  .party-bit {
+    bottom: 18%;
+    animation: party-bit 2.2s ease-out forwards;
   }
 }

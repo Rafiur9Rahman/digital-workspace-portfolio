@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Vendored EmulatorJS data + GBA core — reproduced from node_modules by
+# `npm run setup:emulator` (predev / prebuild). ~6MB, don't commit.
+/public/emulatorjs/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

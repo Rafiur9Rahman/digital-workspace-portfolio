@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { MenuBar } from './MenuBar'
 import { Dock } from './Dock'
+import { DesktopIcons } from './DesktopIcons'
 import { Launcher } from './Launcher'
 import { Window } from './Window'
 import { useWindows } from '../store/windows'
@@ -27,7 +28,8 @@ export function Desktop() {
 
       {/* Window area sits between menu bar and screen bottom */}
       <div ref={areaRef} className="absolute inset-x-0 bottom-0 top-8">
-        {windows.every((w) => w.minimized) && <Launcher />}
+        <Launcher />
+        <DesktopIcons deskW={size.w} deskH={size.h} />
         <AnimatePresence>
           {windows.map((win) => (
             <Window key={win.id} win={win} deskW={size.w} deskH={size.h} />

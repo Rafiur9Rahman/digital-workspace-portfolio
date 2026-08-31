@@ -79,3 +79,54 @@ export const skills: Record<string, string[]> = {
   'AI': ['Azure OpenAI', 'Embeddings / RAG', 'Prompt engineering', 'LangChain'],
   'Software': ['React', 'TypeScript', 'Python', 'FastAPI', 'Git'],
 }
+
+export interface ExperienceItem {
+  company: string
+  role: string
+  period: string
+  location?: string
+  highlights: string[]
+}
+
+/* PLACEHOLDER — replace with real roles. Everything that shows work history
+   (the `experience` terminal command, the CV command, the /experience folder in
+   the terminal filesystem) reads from this array. */
+export const experience: ExperienceItem[] = [
+  {
+    company: 'Placeholder Consulting',
+    role: 'Data & AI Consultant',
+    period: '2024 — Present',
+    location: 'United Kingdom',
+    highlights: [
+      'Led delivery of a semantic document search platform adopted by several internal teams.',
+      'Built automated analytics pipelines that replaced manual spreadsheet reporting.',
+    ],
+  },
+  {
+    company: 'Placeholder Software Co.',
+    role: 'Software Engineer',
+    period: '2022 — 2024',
+    highlights: ['Shipped internal tools and data services used across the business.'],
+  },
+]
+
+export interface Certification {
+  name: string
+  issuer: string
+  year: string
+  credentialUrl?: string
+}
+
+/* PLACEHOLDER — replace with real certifications. */
+export const certifications: Certification[] = [
+  { name: 'Placeholder AI Engineering Certificate', issuer: 'Placeholder Institute', year: '2026' },
+  { name: 'Placeholder Cloud Data Certificate', issuer: 'Placeholder Cloud', year: '2025' },
+]
+
+/* External links. An empty string means "not published yet" — commands and apps
+   handle that gracefully. `cv` is a path/URL to a PDF once one exists. */
+export const links = {
+  github: 'https://github.com/Rafiur9Rahman',
+  linkedin: '',
+  cv: '',
+}

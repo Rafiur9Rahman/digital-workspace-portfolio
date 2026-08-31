@@ -4,12 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/setup-emulator.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/setup-emulator.mjs",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "preview": "vite preview",
+    "setup:emulator": "node scripts/setup-emulator.mjs"
   },
   "dependencies": {
+    "@emulatorjs/core-mgba": "4.2.3",
+    "@emulatorjs/emulatorjs": "4.2.3",
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
     "framer-motion": "^13.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -25,6 +34,10 @@
     "postcss": "^8.5.26",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.2",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "@emulatorjs/cores": "npm:@emulatorjs/core-mgba@4.2.3"
   }
 }

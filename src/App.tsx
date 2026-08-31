@@ -1,11 +1,20 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { BootScreen } from './components/BootScreen'
+import { ShutdownScreen } from './components/ShutdownScreen'
 import { Desktop } from './components/Desktop'
+import { useAuth } from './store/auth'
+import { useWorkspace } from './store/workspace'
 
 export default function App() {
-  const [booted, setBooted] = useState(false)
+  const power = useWorkspace((s) => s.power)
+  const powerOn = useWorkspace((s) => s.powerOn)
+  const reboot = useWorkspace((s) => s.reboot)
   const reduce = useReducedMotion()
+
+  useEffect(() => useAuth.getState().init(), [])
+
+  const settled = power === 'running'
 
   return (
     <>
@@ -14,8 +23,8 @@ export default function App() {
         className="h-full w-full"
         initial={false}
         animate={{
-          opacity: booted || reduce ? 1 : 0.55,
-          scale: booted || reduce ? 1 : 0.994,
+          opacity: settled || reduce ? 1 : 0.55,
+          scale: settled || reduce ? 1 : 0.994,
         }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
@@ -23,7 +32,10 @@ export default function App() {
       </motion.div>
 
       <AnimatePresence>
-        {!booted && <BootScreen onDone={() => setBooted(true)} />}
+        {power === 'booting' && <BootScreen key="boot" onDone={powerOn} />}
+        {power === 'shutdown' && (
+          <ShutdownScreen key="shutdown" onPowerOn={reboot} />
+        )}
       </AnimatePresence>
     </>
   )
