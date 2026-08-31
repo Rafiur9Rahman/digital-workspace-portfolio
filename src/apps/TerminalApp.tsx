@@ -9,15 +9,15 @@ import { portfolioFs } from '../terminal/filesystem'
 import { promptFor, useTerminalSession } from '../terminal/useTerminalSession'
 import type { LineKind, OutputLine } from '../terminal/types'
 
-/* Green is reserved for success / status lines — the rest uses the normal
-   desktop text palette so the terminal matches the other apps. */
+/* Green is reserved for success / status; the rest is a calm terminal palette
+   (soft off-white body, blue paths, muted secondary). */
 const KIND_CLASS: Record<LineKind, string> = {
   input: 'text-desk-muted',
-  output: 'text-desk-text',
+  output: 'text-[#d7dcef]',
   error: 'text-red-400',
-  system: 'text-green-400',
+  system: 'text-emerald-400',
   muted: 'text-desk-muted/80',
-  accent: 'text-desk-accent',
+  accent: 'text-[#7aa2f7]',
 }
 
 export function TerminalApp() {
@@ -37,7 +37,7 @@ export function TerminalApp() {
   useEffect(() => {
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [state.lines, state.showHint])
+  }, [state.lines])
 
   // Auto-dismiss achievement toasts, one after another.
   useEffect(() => {
@@ -89,7 +89,7 @@ export function TerminalApp() {
 
   return (
     <div
-      className="relative flex h-full flex-col bg-desk-bg font-mono text-xs"
+      className="relative h-full overflow-hidden bg-desk-bg font-mono text-[13px] leading-relaxed selection:bg-emerald-400/25"
       onClick={() => {
         if (!window.getSelection()?.toString()) inputRef.current?.focus()
       }}
@@ -99,43 +99,42 @@ export function TerminalApp() {
         role="log"
         aria-live="polite"
         aria-label="Terminal output"
-        className="desk-scroll flex-1 overflow-auto px-3 py-2.5 leading-relaxed"
+        className="desk-scroll h-full overflow-auto px-4 py-3"
       >
-        {state.showHint && (
-          <p className="text-desk-muted">
-            Try: <span className="text-desk-text">help</span>,{' '}
-            <span className="text-desk-text">projects</span>,{' '}
-            <span className="text-desk-text">about</span>
+        <div className="mb-3 border-b border-desk-edge/60 pb-2.5">
+          <p className="text-[#d7dcef]">Welcome to the terminal.</p>
+          <p className="mt-0.5 text-[12px] text-desk-muted">
+            Only use this if you&rsquo;re comfortable with a command line. Type{' '}
+            <span className="text-emerald-400">help</span> to get started.
           </p>
-        )}
+        </div>
+
         {state.lines.map((line, i) => (
           <TerminalLine key={i} line={line} />
         ))}
-      </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          void submit()
-        }}
-        className="flex items-center gap-2 border-t border-desk-edge px-3 py-2"
-      >
-        <span className="shrink-0 select-none text-desk-accent">
-          {promptFor(state.cwd)}
-        </span>
-        <input
-          ref={inputRef}
-          value={state.input}
-          onChange={(e) => dispatch({ type: 'setInput', value: e.target.value })}
-          onKeyDown={onKeyDown}
-          autoFocus
-          spellCheck={false}
-          autoComplete="off"
-          autoCapitalize="off"
-          aria-label="Terminal input"
-          className="min-w-0 flex-1 bg-transparent text-desk-text outline-none"
-        />
-      </form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            void submit()
+          }}
+          className="flex"
+        >
+          <Prompt cwd={state.cwd} />
+          <input
+            ref={inputRef}
+            value={state.input}
+            onChange={(e) => dispatch({ type: 'setInput', value: e.target.value })}
+            onKeyDown={onKeyDown}
+            autoFocus
+            spellCheck={false}
+            autoComplete="off"
+            autoCapitalize="off"
+            aria-label="Terminal input"
+            className="min-w-0 flex-1 bg-transparent text-[#e6ecff] caret-emerald-400 outline-none"
+          />
+        </form>
+      </div>
 
       {state.effect === 'matrix' && <MatrixRain onExit={clearEffect} />}
       {state.effect === 'party' && (
@@ -143,6 +142,37 @@ export function TerminalApp() {
       )}
       {state.toasts[0] && <AchievementToast id={state.toasts[0]} />}
     </div>
+  )
+}
+
+function Prompt({ cwd }: { cwd: string }) {
+  const path = cwd === '/' ? '~' : `~${cwd}`
+  return (
+    <span className="shrink-0 select-none whitespace-pre">
+      <span className="text-emerald-400">visitor@rafiur</span>
+      <span className="text-desk-muted">:</span>
+      <span className="text-[#7aa2f7]">{path}</span>
+      <span className="text-desk-muted">{'$ '}</span>
+    </span>
+  )
+}
+
+function TerminalLine({ line }: { line: OutputLine }) {
+  if (line.kind === 'input' && line.text.startsWith('visitor@rafiur:')) {
+    const i = line.text.indexOf('$ ')
+    if (i !== -1) {
+      return (
+        <pre className="whitespace-pre-wrap break-words">
+          <span className="text-emerald-400/70">{line.text.slice(0, i + 1)}</span>
+          <span className="text-desk-text/80">{line.text.slice(i + 1)}</span>
+        </pre>
+      )
+    }
+  }
+  return (
+    <pre className={`whitespace-pre-wrap break-words ${KIND_CLASS[line.kind]}`}>
+      {line.text || ' '}
+    </pre>
   )
 }
 
@@ -159,13 +189,5 @@ function AchievementToast({ id }: { id: AchievementId }) {
       </p>
       <p className="mt-0.5 text-sm text-desk-text">🏆 {def.title}</p>
     </div>
-  )
-}
-
-function TerminalLine({ line }: { line: OutputLine }) {
-  return (
-    <pre className={`whitespace-pre-wrap break-words ${KIND_CLASS[line.kind]}`}>
-      {line.text || ' '}
-    </pre>
   )
 }

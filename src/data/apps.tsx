@@ -46,7 +46,7 @@ export const APPS: Record<AppId, AppDef> = {
   terminal: {
     id: 'terminal',
     title: APP_TITLES.terminal,
-    icon: '▮',
+    icon: '⌨️',
     component: TerminalApp,
     defaultSize: { width: 680, height: 460 },
   },

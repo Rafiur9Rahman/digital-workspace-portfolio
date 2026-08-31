@@ -17,12 +17,6 @@ describe('session reducer', () => {
     expect(next.lines).toEqual([])
   })
 
-  it('hideHint flips once and is then a no-op (same reference)', () => {
-    const hidden = reducer(start(), { type: 'hideHint' })
-    expect(hidden.showHint).toBe(false)
-    expect(reducer(hidden, { type: 'hideHint' })).toBe(hidden)
-  })
-
   it('pushSubmitted records the line and parks the cursor at the end', () => {
     const next = reducer(start(), { type: 'pushSubmitted', line: 'help' })
     expect(next.submitted).toEqual(['help'])

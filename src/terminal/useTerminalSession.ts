@@ -25,7 +25,6 @@ export interface SessionState {
   /** cursor into `submitted`; === submitted.length means "editing a new line" */
   histCursor: number
   cwd: string
-  showHint: boolean
   effect: TerminalEffect | null
   running: boolean
   /** queue of achievements to announce, oldest first */
@@ -38,7 +37,6 @@ export const INITIAL_SESSION: SessionState = {
   submitted: [],
   histCursor: 0,
   cwd: '/',
-  showHint: true,
   effect: null,
   running: false,
   toasts: [],
@@ -49,7 +47,6 @@ export type SessionAction =
   | { type: 'append'; lines: OutputLine[] }
   | { type: 'clear' }
   | { type: 'setCwd'; cwd: string }
-  | { type: 'hideHint' }
   | { type: 'setEffect'; effect: TerminalEffect | null }
   | { type: 'setRunning'; running: boolean }
   | { type: 'pushSubmitted'; line: string }
@@ -68,8 +65,6 @@ export function reducer(state: SessionState, action: SessionAction): SessionStat
       return { ...state, lines: [] }
     case 'setCwd':
       return { ...state, cwd: action.cwd }
-    case 'hideHint':
-      return state.showHint ? { ...state, showHint: false } : state
     case 'setEffect':
       return { ...state, effect: action.effect }
     case 'setRunning':
@@ -184,7 +179,6 @@ export function useTerminalSession(deps: SessionDeps) {
 
     dispatch({ type: 'append', lines: [{ kind: 'input', text: `${prompt} ${raw}` }] })
     dispatch({ type: 'pushSubmitted', line: raw })
-    dispatch({ type: 'hideHint' })
     dispatch({ type: 'setRunning', running: true })
 
     const controller = new AbortController()
