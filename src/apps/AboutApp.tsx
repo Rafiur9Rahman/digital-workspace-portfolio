@@ -11,7 +11,7 @@ export function AboutApp() {
         <dt>Location</dt>
         <dd className="text-desk-text">{profile.location}</dd>
         <dt>Email</dt>
-        <dd className="text-desk-text">{profile.email}</dd>
+        <dd className="break-all text-desk-text">{profile.email}</dd>
       </dl>
 
       <h3 className="mt-6 text-xs font-semibold uppercase tracking-widest text-desk-muted">

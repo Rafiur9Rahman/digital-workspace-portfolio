@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
   buildWorkspaceGraph,
   type GraphEdge,
@@ -24,6 +24,7 @@ import {
 import { certifications, experience, projects } from '../data/content'
 import type { AppId } from '../data/appMeta'
 import { useWindows } from '../store/windows'
+import { useIsMobile } from '../lib/useIsMobile'
 
 /* Workspace Map.
    Phase 1: static, pannable, zoomable relationship index.
@@ -197,6 +198,7 @@ export function WorkspaceMapApp() {
   const movedRef = useRef(false)
   const surfaceRef = useRef<HTMLDivElement>(null)
   const reduce = useReducedMotion()
+  const mobile = useIsMobile()
   const openAppWith = useWindows((s) => s.openAppWith)
   const focusRequest = useWindows((s) => s.focusRequest)
   const clearFocusRequest = useWindows((s) => s.clearFocusRequest)
@@ -337,7 +339,9 @@ export function WorkspaceMapApp() {
   }
   const onSurfaceClick = (e: React.MouseEvent) => {
     if (movedRef.current) return
-    if ((e.target as HTMLElement).closest('button')) return
+    // a dimmed / disabled node is not a real target - treat it as empty canvas
+    const btn = (e.target as HTMLElement).closest('button')
+    if (btn && !(btn as HTMLButtonElement).disabled) return
     if (focusId) exitFocus()
   }
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -368,7 +372,11 @@ export function WorkspaceMapApp() {
         </p>
       </header>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-desk-edge px-4 py-2">
+      <div
+        className={`flex flex-wrap items-center border-b border-desk-edge px-4 py-2 ${
+          mobile ? 'gap-x-1.5 gap-y-1.5' : 'gap-x-3 gap-y-2'
+        }`}
+      >
         <div className="flex items-center gap-1">
           <span className="mr-1 text-[9px] uppercase tracking-[0.2em] text-desk-muted">
             View
@@ -384,7 +392,7 @@ export function WorkspaceMapApp() {
           ))}
         </div>
 
-        <span className="h-4 w-px bg-desk-edge" />
+        {!mobile && <span className="h-4 w-px bg-desk-edge" />}
 
         <div className="flex items-center gap-1">
           <ToolbarChip active={allCatsOn} onClick={enableAllCats}>
@@ -401,15 +409,16 @@ export function WorkspaceMapApp() {
           ))}
         </div>
 
-        <div className="ml-auto">
+        <div className={mobile ? 'w-full' : 'ml-auto'}>
           <SearchBox
             nodes={g.nodes.filter((n) => !n.adHoc || n.degree >= 1)}
             onPick={focusNode}
+            wide={mobile}
           />
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
       <div
         ref={surfaceRef}
         tabIndex={0}
@@ -568,7 +577,7 @@ export function WorkspaceMapApp() {
         </div>
       </div>
 
-      {focusId && g.byId.has(focusId) && (
+      {focusId && g.byId.has(focusId) && !mobile && (
         <aside className="w-64 shrink-0 overflow-hidden border-l border-desk-edge bg-desk-panel">
           <DetailPanel
             node={g.byId.get(focusId)!}
@@ -580,6 +589,33 @@ export function WorkspaceMapApp() {
           />
         </aside>
       )}
+
+      <AnimatePresence>
+        {focusId && g.byId.has(focusId) && mobile && (
+          <motion.aside
+            key="sheet"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={
+              reduce ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 34 }
+            }
+            className="absolute inset-x-0 bottom-0 z-40 flex h-[62%] flex-col overflow-hidden rounded-t-2xl border-t border-desk-edge bg-desk-panel shadow-2xl shadow-black/50"
+          >
+            <div className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-desk-edge" />
+            <div className="min-h-0 flex-1">
+              <DetailPanel
+                node={g.byId.get(focusId)!}
+                neighborIds={[...nbrSet]}
+                graph={g}
+                onFocus={focusNode}
+                onOpen={openAppWith}
+                onClose={exitFocus}
+              />
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
       </div>
 
       <footer className="border-t border-desk-edge px-4 py-1.5 text-[10px] uppercase tracking-[0.15em] text-desk-muted">
@@ -621,9 +657,11 @@ function ToolbarChip({
 function SearchBox({
   nodes,
   onPick,
+  wide,
 }: {
   nodes: GraphNode[]
   onPick: (id: string) => void
+  wide?: boolean
 }) {
   const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
@@ -666,10 +704,16 @@ function SearchBox({
         }}
         placeholder="Search the map"
         aria-label="Search the map"
-        className="w-40 rounded border border-desk-edge bg-desk-bg px-2 py-1 text-[11px] text-desk-text placeholder:text-desk-muted focus:border-desk-accent focus:outline-none"
+        className={`rounded border border-desk-edge bg-desk-bg px-2 py-1 text-[11px] text-desk-text placeholder:text-desk-muted focus:border-desk-accent focus:outline-none ${
+          wide ? 'w-full' : 'w-40'
+        }`}
       />
       {open && matches.length > 0 && (
-        <ul className="absolute right-0 z-40 mt-1 w-56 overflow-hidden rounded border border-desk-edge bg-desk-panel shadow-lg">
+        <ul
+          className={`absolute z-40 mt-1 overflow-hidden rounded border border-desk-edge bg-desk-panel shadow-lg ${
+            wide ? 'inset-x-0' : 'right-0 w-56'
+          }`}
+        >
           {matches.map((n) => (
             <li key={n.id}>
               <button

@@ -13,7 +13,7 @@ export function ContactApp() {
           <dd className="mt-0.5">
             <a
               href={`mailto:${profile.email}`}
-              className="text-desk-accent hover:underline"
+              className="break-all text-desk-accent hover:underline"
             >
               {profile.email}
             </a>
