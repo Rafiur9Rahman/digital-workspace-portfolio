@@ -18,6 +18,7 @@ src/terminal/
 ├── autocomplete.ts        Tab completion (commands → app names → fs paths)
 ├── filesystem.ts          in-memory portfolio filesystem (read-only, no real disk)
 ├── achievements.ts        localStorage-backed achievements  (key: ws-terminal-v1)
+├── prefs.ts               localStorage prefs — theme, all-time command count, snake best
 ├── util.ts                sleep(), formatDuration()
 ├── useTerminalSession.ts  useReducer hook — the testable core; builds the context
 ├── commands/
@@ -31,11 +32,12 @@ src/terminal/
 │   ├── sysinfo.ts         neofetch, uptime, hostname, uname, id, groups, env, version
 │   ├── windows.ts         ps/top/htop, apps, kill, focus, minimize, desktop
 │   ├── search.ts          tree, find, grep/search, file
-│   └── fun.ts             joke, quote/motd, coinflip, roll, calc, cowsay, ping, git
+│   └── fun.ts             joke, quote/motd, coinflip, roll, calc, base64, cowsay, ping, git
 └── easterEggs/
-    ├── index.ts           matrix, coffee, 42, fortune, sudo, hack, rm, pokemon, party
+    ├── index.ts           matrix, coffee, 42, fortune, sudo, hack, rm, pokemon, party, snake
     ├── data.ts            fortunes + the hack sequence
     ├── effects.tsx        <MatrixRain>, <PartyBurst>
+    ├── Snake.tsx          canvas Snake game (effect: 'snake')
     └── useKonami.ts       createKonamiMatcher() + the useKonami() hook
 ```
 
@@ -134,7 +136,8 @@ after the first command.
 | **window control** | `ps` (`top`, `htop`) · `apps` · `kill <app>` · `focus <app>` · `minimize <app>` · `desktop` (minimise all) |
 | **search** | `tree` (whole filesystem) · `find <term>` (file names) · `grep <term>` (`search`, portfolio content) · `file <path>` |
 | **git** | `git status` · `git log` · `git blame` · `git push` (denied) · `git commit -m "hire"` → opens Contact + *Root Access* |
-| **meta** | `alias` · `theme` · `status` · `stats` · `history -c` · `clear --all` |
+| **meta** | `alias` · `theme [dark\|matrix\|amber\|mono]` (persists) · `status` · `stats` · `history -c` · `clear --all` |
+| **tools** | `base64 [-d] <text>` (UTF-8 safe, no eval) |
 | **portfolio nav** | `linkedin` · `source` (`repo`) · `credits` · `license` · `changelog` · `tour` (`recruiter`, `tour --fast`) |
 | **fun** | `joke` · `quote` (`motd`) · `calc <expr>` (safe, no eval) · `ping [host]` (`ping recruiter` opens Contact) |
 | **hidden fun** | `cowsay <text>` · `coinflip` · `roll [sides]` · `mkdir`/`touch`/`rmdir`/`mv` (read-only jokes) |
@@ -191,6 +194,7 @@ Not shown in `help`, autocomplete, or "did you mean". Discover by experimenting.
 | `rm -rf /` | | (also matches `~`, `/*`, `-r -f`, `-fr`, …) `Deleting /projects… / /experience… / …` → `99%` → `Operation cancelled. / Nice try.` **Nothing is ever deleted or altered.** Any other `rm` → *"nice try — this exhibit is read-only."* | **Dangerous Individual** |
 | `pokemon` | `pokémon` | Opens the real Game Boy Advance emulator. | |
 | `party` | | Short confetti burst inside the terminal, auto-dismisses in ~2.4s. Renders nothing under `prefers-reduced-motion`. | |
+| `snake` | | Playable Snake on a canvas over the terminal — arrows / WASD, Space to restart, Esc to quit. High score persists (`ws-terminal-prefs-v1`). | |
 | `reboot` | `restart` | Replays the **real** cinematic boot sequence (`BootScreen`), clearing open windows first. Not a re-implementation — it drives `useWorkspace`. | **Time Traveller** |
 | `shutdown` | `poweroff` | Fake OS power-off screen ("It is now safe to close your browser"). **Never closes the tab.** Enter / click / the ⏻ button boots the workspace again. | |
 
