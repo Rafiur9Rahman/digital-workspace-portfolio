@@ -166,14 +166,14 @@ export function Window({ win, deskW, deskH }: Props) {
         left: 0,
         pointerEvents: win.minimized ? 'none' : undefined,
       }}
-      className="flex flex-col overflow-hidden rounded-xl border border-white/[0.12] bg-desk-panel shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_2px_8px_rgba(0,0,0,0.4),0_20px_44px_-10px_rgba(0,0,0,0.55),0_44px_90px_-24px_rgba(0,0,0,0.5)]"
+      className="flex flex-col overflow-hidden rounded-xl border border-desk-edge bg-desk-panel shadow-2xl shadow-black/40"
     >
       <div
         onPointerDown={(e) => {
           if (!win.maximized) dragControls.start(e)
         }}
         onDoubleClick={() => toggleMaximize(win.id, deskW, deskH)}
-        className="flex h-9 shrink-0 select-none items-center gap-2.5 border-b border-black/30 bg-gradient-to-b from-[#1c2540] to-desk-panel px-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+        className="flex h-8 shrink-0 select-none items-center gap-2 border-b border-desk-edge bg-desk-bg/50 px-3"
         style={{ cursor: win.maximized ? 'default' : 'grab' }}
       >
         <div className="group/tl flex items-center gap-2">
@@ -192,10 +192,8 @@ export function Window({ win, deskW, deskH }: Props) {
           />
         </div>
 
-        <span className="ml-1 text-[15px] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]">
-          {app.icon}
-        </span>
-        <span className="truncate text-xs font-medium text-desk-text/85">
+        <span className="ml-1 text-[13px] leading-none">{app.icon}</span>
+        <span className="truncate text-[11px] font-medium text-desk-muted">
           {win.title}
         </span>
       </div>
@@ -255,9 +253,9 @@ export function Window({ win, deskW, deskH }: Props) {
 }
 
 const TL_BG: Record<'red' | 'yellow' | 'green', string> = {
-  red: 'radial-gradient(circle at 32% 28%, #ff9a8f, #ff5f57 55%, #d84036)',
-  yellow: 'radial-gradient(circle at 32% 28%, #ffd67a, #febc2e 55%, #e0991a)',
-  green: 'radial-gradient(circle at 32% 28%, #86e88f, #28c840 55%, #16a02f)',
+  red: 'bg-[#ff5f57]',
+  yellow: 'bg-[#febc2e]',
+  green: 'bg-[#28c840]',
 }
 
 function TrafficLight({
@@ -275,12 +273,7 @@ function TrafficLight({
     <button
       aria-label={label}
       onClick={onClick}
-      className="grid h-3 w-3 place-items-center rounded-full leading-none text-black/45 transition-transform active:scale-90"
-      style={{
-        background: TL_BG[color],
-        boxShadow:
-          'inset 0 1px 1.5px rgba(255,255,255,0.6), inset 0 -1.5px 2px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.4)',
-      }}
+      className={`grid h-3 w-3 place-items-center rounded-full leading-none text-black/55 transition hover:brightness-110 active:brightness-90 ${TL_BG[color]}`}
     >
       <span className="text-[8px] font-bold opacity-0 transition-opacity group-hover/tl:opacity-100">
         {symbol}
