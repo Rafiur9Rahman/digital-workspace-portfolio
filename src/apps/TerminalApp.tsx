@@ -11,12 +11,13 @@ import type { TerminalTheme } from '../terminal/prefs'
 import { promptFor, useTerminalSession } from '../terminal/useTerminalSession'
 import type { LineKind, OutputLine } from '../terminal/types'
 import { forgetVisitor } from '../lib/visitor'
+import { forgetWelcome } from '../lib/welcome'
 
 const FORGET_KEYS = [
   'ws-terminal-v1',
   'ws-terminal-prefs-v1',
   'ws-window-layout-v1',
-  'ws-icons-v1',
+  'ws-icons-v2',
 ]
 
 /* Themes swap CSS variables on the terminal root; everything below reads them.
@@ -119,6 +120,7 @@ export function TerminalApp() {
         }
       }
       forgetVisitor()
+      forgetWelcome()
       useWorkspace.setState({
         visit: { isFirstVisit: true, visits: 0, previousVisit: null },
       })

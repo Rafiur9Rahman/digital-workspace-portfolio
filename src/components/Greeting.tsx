@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useWorkspace } from '../store/workspace'
 import { useWindows } from '../store/windows'
+import { shouldShowWelcome } from '../lib/welcome'
 import type { VisitInfo } from '../lib/visitor'
 
 type Bucket = 'night' | 'morning' | 'afternoon' | 'evening'
@@ -69,6 +70,8 @@ export function Greeting() {
   const reduce = useReducedMotion()
   const [visible, setVisible] = useState(true)
   const [text] = useState(() => greetingFor(visit))
+  // The welcome dialog is doing the welcoming this load; stay out of its way.
+  const [welcomePending] = useState(shouldShowWelcome)
 
   useEffect(() => {
     if (power !== 'running') return
@@ -76,7 +79,7 @@ export function Greeting() {
     return () => clearTimeout(timer)
   }, [power, reduce])
 
-  if (power !== 'running') return null
+  if (power !== 'running' || welcomePending) return null
 
   return (
     <AnimatePresence>

@@ -2,6 +2,7 @@ import { version as reactVersion } from 'react'
 import type { CommandContext, CommandDef, OutputLine } from '../types'
 import { APP_IDS } from '../../data/appMeta'
 import { profile, projects } from '../../data/content'
+import { WORKSPACE_VERSION } from '../../lib/version'
 import { formatDuration } from '../util'
 
 const OS_NAME = 'RafiurOS 1.0'
@@ -18,6 +19,7 @@ function infoLines(ctx: CommandContext): OutputLine[] {
     { kind: 'accent', text: `visitor@${HOSTNAME}` },
     { kind: 'muted', text: '─'.repeat(22) },
     pair('OS', `${OS_NAME} (Web)`),
+    pair('Build', WORKSPACE_VERSION),
     pair('Host', `React ${reactVersion}`),
     pair('Kernel', 'web-x86_64'),
     pair('Uptime', formatDuration(ctx.uptimeMs)),
@@ -105,7 +107,8 @@ const env: CommandDef = {
 const version: CommandDef = {
   name: 'version',
   summary: 'print the OS version',
-  run: () => `${OS_NAME} (web) · React ${reactVersion}`,
+  run: () =>
+    `${OS_NAME} (web) · workspace ${WORKSPACE_VERSION} · React ${reactVersion}`,
 }
 
 export const sysinfoCommands: CommandDef[] = [

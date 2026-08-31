@@ -24,21 +24,21 @@ const ICONS: DeskIcon[] = [
   // { id: 'assistant', label: 'AI Assistant', glyph: '✨', app: 'assistant' },
 ]
 
-/* Default spots, as fractions of the desktop - scattered, clear of the centred
-   nameplate and the dock. Users drag from here and positions are remembered.
-   Keep one entry per icon in ICONS. */
+/* Default spots, as fractions of the desktop - a neat column down the left,
+   clear of the dock. Users can drag them anywhere and the new spot is
+   remembered. Keep one entry per icon in ICONS. */
 const DEFAULTS: Record<string, { x: number; y: number }> = {
-  about: { x: 0.06, y: 0.1 },
-  // projects: { x: 0.05, y: 0.09 },
-  // resume: { x: 0.04, y: 0.52 },
-  images: { x: 0.13, y: 0.72 },
-  gba: { x: 0.85, y: 0.14 },
-  // photo: { x: 0.87, y: 0.1 },
-  // contact: { x: 0.8, y: 0.32 },
-  // assistant: { x: 0.89, y: 0.56 },
+  about: { x: 0.02, y: 0.03 },
+  // projects: { x: 0.02, y: 0.19 },
+  // resume: { x: 0.02, y: 0.35 },
+  images: { x: 0.02, y: 0.19 },
+  gba: { x: 0.02, y: 0.35 },
+  // photo: { x: 0.02, y: 0.51 },
+  // contact: { x: 0.02, y: 0.67 },
+  // assistant: { x: 0.02, y: 0.83 },
 }
 
-const STORE_KEY = 'ws-icons-v1'
+const STORE_KEY = 'ws-icons-v2'
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
 
 type PosMap = Record<string, { x: number; y: number }>

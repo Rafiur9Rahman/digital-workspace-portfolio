@@ -5,7 +5,7 @@ import { MatrixGlitch } from './MatrixGlitch'
 import { Greeting } from './Greeting'
 import { Dock } from './Dock'
 import { DesktopIcons } from './DesktopIcons'
-import { Launcher } from './Launcher'
+import { WelcomeModal } from './WelcomeModal'
 import { Window } from './Window'
 import { useWindows } from '../store/windows'
 
@@ -34,7 +34,6 @@ export function Desktop() {
         ref={areaRef}
         className="absolute inset-x-0 bottom-0 top-[calc(2rem+env(safe-area-inset-top))]"
       >
-        <Launcher />
         <Greeting />
         <DesktopIcons deskW={size.w} deskH={size.h} />
         {/* Windows stay mounted while minimised (Window.tsx hides them) so their
@@ -47,6 +46,7 @@ export function Desktop() {
       </div>
 
       <Dock />
+      <WelcomeModal />
     </div>
   )
 }
