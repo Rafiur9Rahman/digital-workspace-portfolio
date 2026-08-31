@@ -3,7 +3,7 @@
 The **Terminal** app (`src/apps/TerminalApp.tsx`) is a real navigation layer for
 the portfolio and a playground of hidden commands. Roughly 70% useful, 30% fun.
 
-> ⚠️ **Maintainer reference — this file spoils every hidden command.**
+> ⚠️ **Maintainer reference. This file spoils every hidden command.**
 > Visitors are meant to find those by experimenting.
 
 ---
@@ -18,9 +18,9 @@ src/terminal/
 ├── autocomplete.ts        Tab completion (commands → app names → fs paths)
 ├── filesystem.ts          in-memory portfolio filesystem (read-only, no real disk)
 ├── achievements.ts        localStorage-backed achievements  (key: ws-terminal-v1)
-├── prefs.ts               localStorage prefs — theme, all-time command count, snake best
+├── prefs.ts               localStorage prefs: theme, all-time command count, snake best
 ├── util.ts                sleep(), formatDuration()
-├── useTerminalSession.ts  useReducer hook — the testable core; builds the context
+├── useTerminalSession.ts  useReducer hook: the testable core; builds the context
 ├── commands/
 │   ├── portfolio.ts       help, about, projects, skills, experience, certifications,
 │   │                      contact, cv, github, linkedin, source, whoami, credits,
@@ -51,7 +51,7 @@ type CommandResult =
 ```
 
 A bare `string` / `string[]` is shorthand for `output` lines. Command logic is
-pure except for the explicit **context actions** — commands never touch React or
+pure except for the explicit **context actions**: commands never touch React or
 the DOM directly:
 
 | context field | what it does |
@@ -65,14 +65,14 @@ the DOM directly:
 | `reducedMotion` | skip animated buildup when the visitor prefers reduced motion |
 | `openApp(id)` | open/focus a desktop window (`useWindows.openApp`) |
 | `openUrl(url)` | `window.open` in a new tab |
-| `reboot()` / `shutdown()` | drive `useWorkspace` — the real boot screen / a shutdown screen |
+| `reboot()` / `shutdown()` | drive `useWorkspace` - the real boot screen / a shutdown screen |
 | `setCwd(path)` | move around the fake filesystem |
 | `unlock(id)` | unlock an achievement |
 
 ### Adding a command
 
 1. Add a `CommandDef` to the relevant file in `commands/` (or `easterEggs/index.ts`).
-2. Export it from that module's array — the array is already wired into
+2. Export it from that module's array; the array is already wired into
    `registry.ts`.
 3. `hidden: true` keeps it out of `help`, autocomplete and "did you mean".
 4. Add a test in the matching `*.test.ts`.
@@ -92,7 +92,7 @@ one deliberate exception.
 |---|---|
 | `Enter` | run the line |
 | `↑` / `↓` | previous / next command from history |
-| `Tab` | autocomplete — command names, then `open <app>`, then `cd`/`ls`/`cat` paths. Multiple matches are listed. |
+| `Tab` | autocomplete - command names, then `open <app>`, then `cd`/`ls`/`cat` paths. Multiple matches are listed. |
 | `Ctrl+L` | clear the screen (same as `clear`) |
 | `!!` | rerun the previous command |
 | `Esc` | exit the `matrix` effect |
@@ -108,7 +108,7 @@ after the first command.
 | command | aliases | what it does |
 |---|---|---|
 | `help` | | Lists every visible command with its summary. |
-| `about` | | Name, title, tagline, location, email — from `content.ts`. |
+| `about` | | Name, title, tagline, location, email - from `content.ts`. |
 | `projects` | | Every project: title, period, one-line summary, tech. |
 | `skills` | | Skills grouped by area (Data / AI / Software). |
 | `experience` | | Roles, dates, and highlights. |
@@ -122,11 +122,11 @@ after the first command.
 | `echo <text>` | | Prints the text back, spacing preserved. |
 | `history` | | Numbered list of commands run this session. |
 | `pwd` | | Absolute path of the current directory in the fake filesystem. |
-| `ls [path]` | `dir` | Lists a directory — directories first (blue, trailing `/`), then files. |
+| `ls [path]` | `dir` | Lists a directory - directories first (blue, trailing `/`), then files. |
 | `cd [path]` | | Change directory. No argument → `~` (root). Supports `.`, `..`, `~`, absolute and relative paths; `..` past the root clamps. The prompt updates: `visitor@rafiur:~/projects$`. |
 | `cat <file>` | | Prints a file. Files that map to an app append `→ run open <app> to launch the app`. |
 | `open <app>` | `launch` | Opens (or focuses, if already open) a real desktop window. |
-| `achievements` | `ach` | Shows `unlocked / total`. Unlocked ones are ticked; locked ones show only their vague hint (`??? — Follow the white rabbit.`) as a breadcrumb. |
+| `achievements` | `ach` | Shows `unlocked / total`. Unlocked ones are ticked; locked ones show only their vague hint (`??? - Follow the white rabbit.`) as a breadcrumb. |
 
 ### More commands
 
@@ -151,7 +151,7 @@ Friendly aliases: `cv`→resume, `pokemon`/`game`/`gameboy`→gba, `ai`→assist
 `work`→projects, `me`→about.
 
 `open` reuses `useWindows.openApp`, so an already-open app is focused/restored
-rather than duplicated — exactly like clicking its dock/desktop icon.
+rather than duplicated, exactly like clicking its dock/desktop icon.
 
 ---
 
@@ -190,19 +190,19 @@ Not shown in `help`, autocomplete, or "did you mean". Discover by experimenting.
 | `fortune` | | One random developer fortune from a set of 14 in `easterEggs/data.ts`. No external API. | |
 | `sudo` | | *"rafiur is not in the sudoers file. This incident will be reported."* | |
 | `sudo hire rafiur` | | `Verifying credentials...` → `Access granted.` → **opens the real Contact app**. | **Root Access** |
-| `hack` | | Fake sequence: `INITIALISING… / Scanning network… / Bypassing firewall… / …` → `ACCESS DENIED / Reason: you are viewing a portfolio website.` Purely visual — no network, nothing touched. | |
-| `rm -rf /` | | (also matches `~`, `/*`, `-r -f`, `-fr`, …) `Deleting /projects… / /experience… / …` → `99%` → `Operation cancelled. / Nice try.` **Nothing is ever deleted or altered.** Any other `rm` → *"nice try — this exhibit is read-only."* | **Dangerous Individual** |
+| `hack` | | Fake sequence: `INITIALISING… / Scanning network… / Bypassing firewall… / …` → `ACCESS DENIED / Reason: you are viewing a portfolio website.` Purely visual - no network, nothing touched. | |
+| `rm -rf /` | | (also matches `~`, `/*`, `-r -f`, `-fr`, …) `Deleting /projects… / /experience… / …` → `99%` → `Operation cancelled. / Nice try.` **Nothing is ever deleted or altered.** Any other `rm` → *"nice try - this exhibit is read-only."* | **Dangerous Individual** |
 | `pokemon` | `pokémon` | Opens the real Game Boy Advance emulator. | |
 | `party` | | Short confetti burst inside the terminal, auto-dismisses in ~2.4s. Renders nothing under `prefers-reduced-motion`. | |
-| `snake` | | Playable Snake on a canvas over the terminal — arrows / WASD, Space to restart, Esc to quit. High score persists (`ws-terminal-prefs-v1`). | |
-| `reboot` | `restart` | Replays the **real** cinematic boot sequence (`BootScreen`), clearing open windows first. Not a re-implementation — it drives `useWorkspace`. | **Time Traveller** |
+| `snake` | | Playable Snake on a canvas over the terminal - arrows / WASD, Space to restart, Esc to quit. High score persists (`ws-terminal-prefs-v1`). | |
+| `reboot` | `restart` | Replays the **real** cinematic boot sequence (`BootScreen`), clearing open windows first. Not a re-implementation - it drives `useWorkspace`. | **Time Traveller** |
 | `shutdown` | `poweroff` | Fake OS power-off screen ("It is now safe to close your browser"). **Never closes the tab.** Enter / click / the ⏻ button boots the workspace again. | |
 
 ### Konami code
 
 Type **↑ ↑ ↓ ↓ ← → ← → B A** anywhere while the terminal is open. A `window`
 keydown listener (mounted only with the terminal) that **never calls
-`preventDefault`** — arrow keys still navigate history, `b`/`a` still type
+`preventDefault`**: arrow keys still navigate history, `b`/`a` still type
 normally. Fires the `party` effect + a line. → **The Old Ways**
 
 ---
@@ -248,7 +248,7 @@ before/after diff of `getProgress().unlocked` around each command in
 | `commands.test.ts` | every command's `run()` output, `open` aliases, fs commands, `achievements`, `reboot`/`shutdown` |
 | `autocomplete.test.ts` | command / `open` / path completion, hidden never offered |
 | `filesystem.test.ts` | path resolution, tree shape, lazy content, app links |
-| `session.test.ts` | the reducer — history nav, cursor, clear, hint, cwd, toasts |
+| `session.test.ts` | the reducer - history nav, cursor, clear, hint, cwd, toasts |
 | `achievements.test.ts` | unlock-once, persistence, corrupt-store handling, `curious-mind` threshold |
 | `easterEggs.test.ts` | every egg's behaviour + the Konami matcher |
 

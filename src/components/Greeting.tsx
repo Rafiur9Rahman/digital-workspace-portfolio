@@ -22,22 +22,22 @@ const FIRST: Record<Bucket, string> = {
 const RETURNING: Record<Bucket, string[]> = {
   night: [
     'Hello again, night owl.',
-    'Welcome back — late one tonight.',
+    'Welcome back. Late one tonight.',
     'Back at this hour? Respect.',
     'The workspace never sleeps. Apparently neither do you.',
   ],
   morning: [
-    'Good morning — welcome back.',
+    'Good morning, welcome back.',
     'Morning. Good to see you again.',
     'Welcome back. Early start.',
   ],
   afternoon: [
-    'Good afternoon — welcome back.',
+    'Good afternoon, welcome back.',
     'Welcome back.',
     'Afternoon. Back for more?',
   ],
   evening: [
-    'Good evening — welcome back.',
+    'Good evening, welcome back.',
     'Evening. Good to see you again.',
     'Welcome back.',
   ],
@@ -53,7 +53,7 @@ function greetingFor(visit: VisitInfo): GreetingText {
   if (visit.isFirstVisit) {
     return {
       primary: FIRST[bucket],
-      secondary: 'This is a desktop OS — try the dock, or open the Terminal.',
+      secondary: 'This is a desktop OS. Try the dock, or open the Terminal.',
     }
   }
   const pool = RETURNING[bucket]

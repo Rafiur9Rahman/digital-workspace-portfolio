@@ -24,7 +24,7 @@ const ICONS: DeskIcon[] = [
   // { id: 'assistant', label: 'AI Assistant', glyph: '✨', app: 'assistant' },
 ]
 
-/* Default spots, as fractions of the desktop — scattered, clear of the centred
+/* Default spots, as fractions of the desktop - scattered, clear of the centred
    nameplate and the dock. Users drag from here and positions are remembered.
    Keep one entry per icon in ICONS. */
 const DEFAULTS: Record<string, { x: number; y: number }> = {
@@ -203,7 +203,7 @@ function DraggableIcon({
         if (!draggingRef.current) onOpen()
       }}
       style={{ x, y, position: 'absolute', left: 0, top: 0, width: boxW }}
-      title={`${icon.label} — double-click to open`}
+      title={`${icon.label} - double-click to open`}
       className={`flex cursor-grab flex-col items-center gap-1 rounded-lg px-2 py-2.5 text-center transition active:cursor-grabbing ${
         selected
           ? 'bg-desk-accent/20 ring-1 ring-desk-accent/40'

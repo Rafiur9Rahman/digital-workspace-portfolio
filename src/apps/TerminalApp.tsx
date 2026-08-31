@@ -138,7 +138,7 @@ export function TerminalApp() {
   useKonami(() => {
     dispatch({
       type: 'append',
-      lines: [{ kind: 'system', text: '↑ ↑ ↓ ↓ ← → ← → B A — you know the way.' }],
+      lines: [{ kind: 'system', text: '↑ ↑ ↓ ↓ ← → ← → B A - you know the way.' }],
     })
     dispatch({ type: 'setEffect', effect: 'party' })
     if (unlock('konami-code')) dispatch({ type: 'toast', ids: ['konami-code'] })
@@ -155,7 +155,7 @@ export function TerminalApp() {
   )
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    // A full-screen effect (matrix / snake) owns the keyboard while it's up —
+    // A full-screen effect (matrix / snake) owns the keyboard while it's up -
     // let its own window listener handle everything, don't also nav history.
     if (state.effect) return
     if (e.key === 'ArrowUp') {

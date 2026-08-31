@@ -44,7 +44,7 @@ const about: CommandDef = {
   summary: 'who is Rafiur',
   run: () => ({
     lines: [
-      { kind: 'output', text: `${profile.name} — ${profile.title}` },
+      { kind: 'output', text: `${profile.name}, ${profile.title}` },
       { kind: 'output', text: profile.tagline },
       { kind: 'muted', text: `${profile.location} · ${profile.email}` },
     ],
@@ -79,7 +79,7 @@ const experienceCmd: CommandDef = {
   summary: 'work history',
   run: () => ({
     lines: experience.flatMap<OutputLine>((job) => [
-      { kind: 'output', text: `${job.role} — ${job.company}` },
+      { kind: 'output', text: `${job.role}, ${job.company}` },
       {
         kind: 'muted',
         text: `  ${job.period}${job.location ? ` · ${job.location}` : ''}`,
@@ -96,7 +96,7 @@ const certificationsCmd: CommandDef = {
   run: () => ({
     lines: certifications.map<OutputLine>((c) => ({
       kind: 'output',
-      text: `${c.name} — ${c.issuer} (${c.year})`,
+      text: `${c.name}, ${c.issuer} (${c.year})`,
     })),
   }),
 }
@@ -122,11 +122,11 @@ const cv: CommandDef = {
   run: () => {
     const top = [...projects].sort((a, b) => b.difficulty - a.difficulty).slice(0, 3)
     const lines: OutputLine[] = [
-      { kind: 'output', text: `${profile.name} — ${profile.title}` },
+      { kind: 'output', text: `${profile.name}, ${profile.title}` },
       { kind: 'muted', text: profile.tagline },
       { kind: 'muted', text: '' },
       { kind: 'output', text: 'Selected work' },
-      ...top.map<OutputLine>((p) => ({ kind: 'muted', text: `  • ${p.title} — ${p.summary}` })),
+      ...top.map<OutputLine>((p) => ({ kind: 'muted', text: `  • ${p.title}: ${p.summary}` })),
       { kind: 'muted', text: '' },
       { kind: 'output', text: 'Skills' },
       ...Object.entries(skills).map<OutputLine>(([group, items]) => ({
@@ -136,7 +136,7 @@ const cv: CommandDef = {
       { kind: 'muted', text: '' },
       links.cv
         ? { kind: 'muted', text: `Full PDF: ${links.cv}` }
-        : { kind: 'muted', text: `Full CV on request — ${profile.email}` },
+        : { kind: 'muted', text: `Full CV on request: ${profile.email}` },
     ]
     return { lines }
   },
@@ -193,7 +193,7 @@ const credits: CommandDef = {
 const license: CommandDef = {
   name: 'license',
   summary: 'licence information',
-  run: () => `MIT © ${profile.name} — reuse the code, not the identity.`,
+  run: () => `MIT © ${profile.name}. Reuse the code, not the identity.`,
 }
 
 const changelog: CommandDef = {
@@ -219,7 +219,7 @@ const tour: CommandDef = {
       const top = [...projects].sort((a, b) => b.difficulty - a.difficulty).slice(0, 2)
       return {
         lines: [
-          { kind: 'output', text: `${profile.name} — ${profile.title}` },
+          { kind: 'output', text: `${profile.name}, ${profile.title}` },
           { kind: 'muted', text: profile.tagline },
           { kind: 'muted', text: `${profile.location} · ${profile.email}` },
           { kind: 'muted', text: `Top work: ${top.map((p) => p.title).join(', ')}` },
@@ -233,14 +233,14 @@ const tour: CommandDef = {
       ['resume', 'The one-page CV'],
       ['contact', 'How to reach me'],
     ]
-    ctx.print({ kind: 'system', text: 'Starting the tour — opening apps as we go.' })
+    ctx.print({ kind: 'system', text: 'Starting the tour, opening apps as we go.' })
     for (const [appId, label] of steps) {
       if (ctx.signal.aborted) return
       ctx.print({ kind: 'muted', text: `→ ${label}` })
       ctx.openApp(appId)
       if (!ctx.reducedMotion) await sleep(1100, ctx.signal)
     }
-    return { lines: [{ kind: 'system', text: "That's the tour — thanks for stopping by." }] }
+    return { lines: [{ kind: 'system', text: "That's the tour - thanks for stopping by." }] }
   },
 }
 

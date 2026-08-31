@@ -13,7 +13,7 @@ export const KONAMI_SEQUENCE = [
   'a',
 ] as const
 
-/** Stateful matcher — feed it keys, returns true on the key that completes the code. */
+/** Stateful matcher - feed it keys, returns true on the key that completes the code. */
 export function createKonamiMatcher(): (key: string) => boolean {
   let progress = 0
   return (key) => {

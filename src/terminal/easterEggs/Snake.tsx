@@ -173,7 +173,7 @@ export function Snake({ onExit }: { onExit: () => void }) {
       <canvas ref={canvasRef} className="rounded border border-white/10" />
       <p className="text-[11px] text-[var(--td)]">
         {dead
-          ? 'game over — Space to restart · Esc to quit'
+          ? 'game over - Space to restart · Esc to quit'
           : 'arrows / wasd to steer · Esc to quit'}
       </p>
     </div>

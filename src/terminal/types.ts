@@ -45,13 +45,13 @@ export interface CommandContext {
   cwd: string
   /** the read-only portfolio filesystem */
   fs: FileSystem
-  /** every registered command — for `help` and discovery, without importing the registry */
+  /** every registered command - for `help` and discovery, without importing the registry */
   listCommands: () => CommandDef[]
   /** append a line to the terminal now (for streamed / async output) */
   print: (line: OutputLine | string) => void
   /** aborts on unmount / Ctrl+C / `clear` */
   signal: AbortSignal
-  /** the visitor prefers reduced motion — skip animated buildup, show the result */
+  /** the visitor prefers reduced motion - skip animated buildup, show the result */
   reducedMotion: boolean
   /** ms since the workspace session started */
   uptimeMs: number
@@ -82,7 +82,7 @@ export interface CommandDef {
   aliases?: string[]
   summary: string
   usage?: string
-  /** kept out of `help` — easter eggs */
+  /** kept out of `help` - easter eggs */
   hidden?: boolean
   run: (ctx: CommandContext) => CommandResult | Promise<CommandResult>
 }

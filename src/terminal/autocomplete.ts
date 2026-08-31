@@ -5,7 +5,7 @@ import type { FileSystem } from './filesystem'
 export interface CompletionResult {
   /** replace the whole input with this (exact match, or a longer shared prefix) */
   replacement?: string
-  /** every candidate — shown when there is more than one and no clear extension */
+  /** every candidate - shown when there is more than one and no clear extension */
   matches: string[]
 }
 
@@ -29,7 +29,7 @@ function resolve(prefix: string, token: string, candidates: string[]): Completio
   const matches = candidates.filter((c) => c.startsWith(token)).sort()
   if (matches.length === 0) return { matches: [] }
   if (matches.length === 1) {
-    // no trailing space after a directory — the user keeps navigating
+    // no trailing space after a directory - the user keeps navigating
     const trail = matches[0].endsWith('/') ? '' : ' '
     return { replacement: `${prefix}${matches[0]}${trail}`, matches }
   }

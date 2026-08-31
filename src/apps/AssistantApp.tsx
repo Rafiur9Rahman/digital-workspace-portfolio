@@ -25,7 +25,7 @@ function answer(qRaw: string): Msg {
     const p = [...projects].sort((a, b) => b.difficulty - a.difficulty)[0]
     return {
       role: 'assistant',
-      text: `His most technically difficult project is "${p.title}" (difficulty ${p.difficulty}/5) — ${p.summary}`,
+      text: `His most technically difficult project is "${p.title}" (difficulty ${p.difficulty}/5). ${p.summary}`,
       project: p,
     }
   }
@@ -37,7 +37,7 @@ function answer(qRaw: string): Msg {
       role: 'assistant',
       text: `AI work: ${ai
         .map((x) => x.title)
-        .join(', ')}. For example "${p.title}" — ${p.summary}`,
+        .join(', ')}. For example "${p.title}": ${p.summary}`,
       project: p,
     }
   }
@@ -57,7 +57,7 @@ function answer(qRaw: string): Msg {
   if (hit) {
     return {
       role: 'assistant',
-      text: `That sounds like "${hit.title}" — ${hit.summary}`,
+      text: `That sounds like "${hit.title}": ${hit.summary}`,
       project: hit,
     }
   }
@@ -71,7 +71,7 @@ function answer(qRaw: string): Msg {
 export function AssistantApp() {
   const openApp = useWindows((s) => s.openApp)
   const [messages, setMessages] = useState<Msg[]>([
-    { role: 'assistant', text: "Hi — I'm Rafiur's portfolio assistant. Ask me anything about his work." },
+    { role: 'assistant', text: "Hi, I'm Rafiur's portfolio assistant. Ask me anything about his work." },
   ])
   const [input, setInput] = useState('')
 

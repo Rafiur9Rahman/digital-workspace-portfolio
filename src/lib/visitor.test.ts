@@ -14,7 +14,7 @@ describe('visitor record', () => {
 
   it('does not double-count within a session, but does across sessions', () => {
     recordVisit()
-    expect(recordVisit().visits).toBe(1) // same session — guard holds
+    expect(recordVisit().visits).toBe(1) // same session - guard holds
 
     sessionStorage.clear() // simulate a new browser session
     const next = recordVisit()

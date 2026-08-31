@@ -78,7 +78,7 @@ const cat: CommandDef = {
   },
 }
 
-/* The tree is a read-only exhibit — these just say so, playfully. */
+/* The tree is a read-only exhibit - these just say so, playfully. */
 const readOnly = (name: string, aliases?: string[]): CommandDef => ({
   name,
   aliases,
@@ -88,7 +88,7 @@ const readOnly = (name: string, aliases?: string[]): CommandDef => ({
     lines: [
       {
         kind: 'error',
-        text: `${name}: ${ctx.args[0] ?? ''}: cannot write — this filesystem is read-only`.replace(
+        text: `${name}: ${ctx.args[0] ?? ''}: cannot write, this filesystem is read-only`.replace(
           ': :',
           ':',
         ),

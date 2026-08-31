@@ -1,5 +1,5 @@
 /* Remembers the last ROM the user loaded (bytes + name) so the Game Boy Advance
-   app auto-loads it next time — no re-upload. Everything is IndexedDB, local to
+   app auto-loads it next time - no re-upload. Everything is IndexedDB, local to
    this browser. In-game saves and save states are handled separately by
    EmulatorJS in its own IndexedDB stores. */
 
@@ -52,6 +52,6 @@ export async function saveLastRom(name: string, bytes: ArrayBuffer): Promise<voi
   try {
     await run('readwrite', (s) => s.put({ name, bytes }, LAST_ROM_KEY))
   } catch {
-    /* ignore — private mode / storage disabled */
+    /* ignore - private mode / storage disabled */
   }
 }

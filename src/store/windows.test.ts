@@ -14,7 +14,7 @@ describe('useWindows', () => {
     expect(state().windows[0]).toMatchObject({ appId: 'terminal', minimized: false, maximized: false })
   })
 
-  it('does not duplicate an already-open app — it focuses it instead', () => {
+  it('does not duplicate an already-open app - it focuses it instead', () => {
     state().openApp('terminal')
     const terminalId = state().windows[0].id
     state().openApp('projects')

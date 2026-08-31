@@ -1,7 +1,7 @@
 import { useWindows } from '../store/windows'
 import { APP_ICONS, APP_TITLES, type AppId } from '../data/appMeta'
 
-/* A Finder-style launcher. Every "file" and "folder" is a real desktop app —
+/* A Finder-style launcher. Every "file" and "folder" is a real desktop app -
    clicking one opens (or focuses) its window through the same window store the
    dock and desktop icons use. */
 const SECTIONS: { label: string; ids: AppId[] }[] = [

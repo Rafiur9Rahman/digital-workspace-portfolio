@@ -8,7 +8,7 @@ import {
   unlock,
 } from './achievements'
 
-// localStorage is a fresh in-memory shim per test — see src/test/setup.ts
+// localStorage is a fresh in-memory shim per test - see src/test/setup.ts
 
 describe('achievements', () => {
   it('unlock returns true the first time and false afterwards', () => {

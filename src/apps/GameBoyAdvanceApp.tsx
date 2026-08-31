@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { loadLastRom, saveLastRom } from '../lib/gbaStorage'
 import { useWindows } from '../store/windows'
 
-/* Game Boy Advance — EmulatorJS (mGBA core), fully self-hosted from
+/* Game Boy Advance - EmulatorJS (mGBA core), fully self-hosted from
    /emulatorjs (see scripts/setup-emulator.mjs). The ROM is read client-side and
    never uploaded. In-game saves + save states persist in EmulatorJS's own
    IndexedDB; this component additionally remembers the last ROM so it reopens
    into the same game. All local to this browser.
 
-   emulator.min.js declares `class EmulatorJS` at global scope — loading it a
+   emulator.min.js declares `class EmulatorJS` at global scope - loading it a
    second time throws "redeclaration of let EmulatorJS", which then cascades
    into "EJS_STORAGE is not a constructor" and "this.game.parentElement is
    null". So the runtime is loaded exactly once per page (loadEmulatorRuntime),
@@ -43,11 +43,11 @@ type EJSWindow = Window &
   }
 
 /* RetroPad button index -> { keyboard key (EmulatorJS keyMap name), gamepad }.
-   GBA has no X/Y. A=K, B=J, L=U, R=I, Start=Enter, Select=Backspace — none clash
+   GBA has no X/Y. A=K, B=J, L=U, R=I, Start=Enter, Select=Backspace - none clash
    with WASD, which is mirrored onto the D-pad below. */
 const GBA_CONTROLS: Record<number, { value: string; value2: string }> = {
   0: { value: 'j', value2: 'BUTTON_2' }, // B
-  1: { value: '', value2: 'BUTTON_4' }, // (Y — n/a)
+  1: { value: '', value2: 'BUTTON_4' }, // (Y - n/a)
   2: { value: 'backspace', value2: 'SELECT' }, // Select
   3: { value: 'enter', value2: 'START' }, // Start
   4: { value: 'up arrow', value2: 'DPAD_UP' },
@@ -55,7 +55,7 @@ const GBA_CONTROLS: Record<number, { value: string; value2: string }> = {
   6: { value: 'left arrow', value2: 'DPAD_LEFT' },
   7: { value: 'right arrow', value2: 'DPAD_RIGHT' },
   8: { value: 'k', value2: 'BUTTON_1' }, // A
-  9: { value: '', value2: 'BUTTON_3' }, // (X — n/a)
+  9: { value: '', value2: 'BUTTON_3' }, // (X - n/a)
   10: { value: 'u', value2: 'LEFT_TOP_SHOULDER' }, // L
   11: { value: 'i', value2: 'RIGHT_TOP_SHOULDER' }, // R
   12: { value: '', value2: 'LEFT_BOTTOM_SHOULDER' },
@@ -150,12 +150,12 @@ function patchHandleResize(): void {
   proto.__resizePatched = true
 }
 
-/* Best-effort teardown of the running instance — EmulatorJS provides none.
+/* Best-effort teardown of the running instance - EmulatorJS provides none.
 
    Note: we deliberately do NOT sweep `window.EJS_*` here. Those keys include
    EmulatorJS's own runtime classes (EJS_STORAGE, EJS_COMPRESSION, EJS_GAMEPAD,
    EJS_SHADERS, EJS_GameManager) which are defined once by emulator.min.js and
-   must survive between boots — deleting them makes `new EJS_STORAGE()` throw
+   must survive between boots - deleting them makes `new EJS_STORAGE()` throw
    "not a constructor" inside the next EmulatorJS constructor. We pass config as
    an object to `new EmulatorJS()`, so no EJS_* config globals are set anyway;
    the only one we own is `EJS_emulator`, cleared below. */
@@ -196,7 +196,7 @@ export function GameBoyAdvanceApp() {
   // mount → unmount → mount fires two) bails after its awaits instead of
   // constructing a second emulator on the same host.
   const bootEpochRef = useRef(0)
-  // The window stays mounted while minimised (so the game isn't lost) — pause
+  // The window stays mounted while minimised (so the game isn't lost) - pause
   // the core meanwhile so it isn't running (and making sound) off-screen.
   const minimized = useWindows(
     (s) => s.windows.find((w) => w.appId === 'gba')?.minimized ?? false,
@@ -236,7 +236,7 @@ export function GameBoyAdvanceApp() {
       return
     }
     // A newer boot() started while the runtime was loading (StrictMode remount,
-    // or the user picked another ROM) — let that one win.
+    // or the user picked another ROM) - let that one win.
     if (!aliveRef.current || epoch !== bootEpochRef.current) return
 
     const w = window as unknown as EJSWindow
@@ -254,7 +254,7 @@ export function GameBoyAdvanceApp() {
     // Only ask for the threaded core when the page is actually cross-origin
     // isolated. With threads:true and no SharedArrayBuffer, EmulatorJS shows
     // "Error for site owner" instead of falling back to the single-threaded
-    // mGBA build — so gate it.
+    // mGBA build - so gate it.
     const isolated =
       typeof window.crossOriginIsolated === 'boolean' &&
       window.crossOriginIsolated
@@ -265,7 +265,7 @@ export function GameBoyAdvanceApp() {
 
     try {
       // The config keys EmulatorJS's loader.js would otherwise map from the
-      // window.EJS_* globals — inlined so we never re-inject the loader.
+      // window.EJS_* globals - inlined so we never re-inject the loader.
       const emu = new EmulatorCtor('#gba-emulator-host', {
         gameUrl: url,
         dataPath: DATA_PATH,
@@ -327,7 +327,7 @@ export function GameBoyAdvanceApp() {
       if (minimized) liveEmulator?.pause?.()
       else liveEmulator?.play?.()
     } catch {
-      /* core not ready — ignore */
+      /* core not ready - ignore */
     }
   }, [minimized, phase])
 
@@ -382,7 +382,7 @@ export function GameBoyAdvanceApp() {
             <div>
               <p className="text-sm text-desk-text">Load a .gba ROM to play.</p>
               <p className="mt-1 text-xs text-desk-muted">
-                The ROM is read in your browser — nothing is uploaded.
+                The ROM is read in your browser - nothing is uploaded.
               </p>
             </div>
           </div>

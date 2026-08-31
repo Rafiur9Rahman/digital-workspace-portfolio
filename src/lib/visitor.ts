@@ -27,7 +27,7 @@ function read(): VisitorRecord | null {
   try {
     raw = localStorage.getItem(KEY)
   } catch {
-    // storage unavailable (private mode) — use this session's copy
+    // storage unavailable (private mode) - use this session's copy
     return memory
   }
   if (!raw) return null

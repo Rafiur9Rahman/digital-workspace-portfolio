@@ -59,7 +59,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
 
         {!isSupabaseConfigured && (
           <p className="mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-200/90">
-            Login backend isn’t configured yet — see the README (Supabase setup).
+            Login backend isn’t configured yet - see the README (Supabase setup).
           </p>
         )}
 

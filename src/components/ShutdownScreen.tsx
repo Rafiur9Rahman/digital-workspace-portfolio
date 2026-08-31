@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
-/* Fake OS power-off. Never closes the tab — the workspace boots again on
+/* Fake OS power-off. Never closes the tab - the workspace boots again on
    Enter / click / the power button, which replays the real BootScreen. */
 export function ShutdownScreen({ onPowerOn }: { onPowerOn: () => void }) {
   const reduce = useReducedMotion()

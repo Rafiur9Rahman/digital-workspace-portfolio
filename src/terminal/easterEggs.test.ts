@@ -47,7 +47,7 @@ function textOf(result: CommandResult): string {
   return String(result ?? '')
 }
 
-describe('easter eggs — discovery', () => {
+describe('easter eggs - discovery', () => {
   it('are all hidden from help and autocomplete', () => {
     const visible = new Set(visibleCommands().map((c) => c.name))
     for (const name of EGGS) {
@@ -57,7 +57,7 @@ describe('easter eggs — discovery', () => {
   })
 })
 
-describe('easter eggs — behaviour', () => {
+describe('easter eggs - behaviour', () => {
   it('matrix starts the effect and unlocks Wake Up, Neo', async () => {
     const unlock = vi.fn()
     expect(await run('matrix', { unlock })).toMatchObject({ effect: 'matrix' })
@@ -149,7 +149,7 @@ describe('konami matcher', () => {
     const match = createKonamiMatcher()
     match('arrowup')
     match('arrowup')
-    match('x') // wrong — progress resets
+    match('x') // wrong - progress resets
     for (const k of KONAMI_SEQUENCE.slice(2)) match(k)
     // the run is incomplete because the first two arrowups were discarded
     expect(match('a')).toBe(false)

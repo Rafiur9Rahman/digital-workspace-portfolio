@@ -3,7 +3,7 @@
 export const profile = {
   name: 'Rafiur Rahman',
   title: 'Consultant • Data • AI • Software',
-  tagline: 'I build data and AI products end to end — from messy source systems to shipped features.',
+  tagline: 'I build data and AI products end to end, from messy source systems to shipped features.',
   location: 'United Kingdom',
   email: 'rafiurrahman1234@icloud.com',
 }
@@ -88,14 +88,14 @@ export interface ExperienceItem {
   highlights: string[]
 }
 
-/* PLACEHOLDER — replace with real roles. Everything that shows work history
+/* PLACEHOLDER - replace with real roles. Everything that shows work history
    (the `experience` terminal command, the CV command, the /experience folder in
    the terminal filesystem) reads from this array. */
 export const experience: ExperienceItem[] = [
   {
     company: 'Placeholder Consulting',
     role: 'Data & AI Consultant',
-    period: '2024 — Present',
+    period: '2024 - Present',
     location: 'United Kingdom',
     highlights: [
       'Led delivery of a semantic document search platform adopted by several internal teams.',
@@ -105,7 +105,7 @@ export const experience: ExperienceItem[] = [
   {
     company: 'Placeholder Software Co.',
     role: 'Software Engineer',
-    period: '2022 — 2024',
+    period: '2022 - 2024',
     highlights: ['Shipped internal tools and data services used across the business.'],
   },
 ]
@@ -117,13 +117,13 @@ export interface Certification {
   credentialUrl?: string
 }
 
-/* PLACEHOLDER — replace with real certifications. */
+/* PLACEHOLDER - replace with real certifications. */
 export const certifications: Certification[] = [
   { name: 'Placeholder AI Engineering Certificate', issuer: 'Placeholder Institute', year: '2026' },
   { name: 'Placeholder Cloud Data Certificate', issuer: 'Placeholder Cloud', year: '2025' },
 ]
 
-/* External links. An empty string means "not published yet" — commands and apps
+/* External links. An empty string means "not published yet" - commands and apps
    handle that gracefully. `cv` is a path/URL to a PDF once one exists. */
 export const links = {
   github: 'https://github.com/Rafiur9Rahman',

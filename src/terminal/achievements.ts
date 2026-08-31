@@ -1,4 +1,4 @@
-/* Terminal achievements — persisted in localStorage under a namespaced key.
+/* Terminal achievements - persisted in localStorage under a namespaced key.
    The unlock *triggers* live in individual commands (wired in Phase 4/5); this
    module is just storage + definitions. It degrades to in-memory state if
    localStorage is unavailable (private mode) or corrupt. */
@@ -15,7 +15,7 @@ export type AchievementId =
 export interface AchievementDef {
   id: AchievementId
   title: string
-  /** shown once unlocked — deliberately vague about how to get it */
+  /** shown once unlocked - deliberately vague about how to get it */
   hint: string
 }
 
@@ -44,7 +44,7 @@ function read(): Store {
   try {
     raw = localStorage.getItem(KEY)
   } catch {
-    // storage genuinely unavailable (private mode) — fall back to this session's
+    // storage genuinely unavailable (private mode) - fall back to this session's
     // in-memory copy so unlocks still work until reload.
     return { ...memory }
   }
@@ -57,7 +57,7 @@ function read(): Store {
       hiddenSeen: Array.isArray(parsed.hiddenSeen) ? parsed.hiddenSeen : [],
     }
   } catch {
-    // corrupt value — treat as a fresh store rather than trusting stale memory.
+    // corrupt value - treat as a fresh store rather than trusting stale memory.
     return { unlocked: {}, hiddenSeen: [] }
   }
 }
@@ -67,7 +67,7 @@ function write(store: Store): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(store))
   } catch {
-    /* private mode / disabled — memory only */
+    /* private mode / disabled - memory only */
   }
 }
 

@@ -84,7 +84,7 @@ const sudo: CommandDef = {
       return {
         lines: [
           { kind: 'system', text: 'Access granted.' },
-          { kind: 'output', text: `Opening ${APP_TITLES.contact} — let's talk.` },
+          { kind: 'output', text: `Opening ${APP_TITLES.contact}. Let's talk.` },
         ],
       }
     }
@@ -128,7 +128,7 @@ const rm: CommandDef = {
     const nuke = /r/.test(flags) && /f/.test(flags) && (target === '/' || target === '~' || target === '/*')
 
     if (!nuke) {
-      return { lines: [{ kind: 'error', text: 'rm: nice try — this exhibit is read-only.' }] }
+      return { lines: [{ kind: 'error', text: 'rm: nice try, this exhibit is read-only.' }] }
     }
 
     ctx.unlock('dangerous-individual')

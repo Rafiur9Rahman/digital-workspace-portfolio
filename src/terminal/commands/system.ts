@@ -155,7 +155,7 @@ const achievements: CommandDef = {
       lines.push(
         done.has(a.id)
           ? { kind: 'system', text: `  ✓  ${a.title}` }
-          : { kind: 'muted', text: `  ·  ??? — ${a.hint}` },
+          : { kind: 'muted', text: `  ·  ???  (${a.hint})` },
       )
     }
     return { lines }
@@ -163,7 +163,7 @@ const achievements: CommandDef = {
 }
 
 /* reboot / shutdown drive the real BootScreen + ShutdownScreen via the
-   workspace store — no duplicate boot animation. Hidden from `help` (they sit
+   workspace store - no duplicate boot animation. Hidden from `help` (they sit
    with the other playful commands), but they're ordinary names people try. */
 const reboot: CommandDef = {
   name: 'reboot',

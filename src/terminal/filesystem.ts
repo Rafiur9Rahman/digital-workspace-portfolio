@@ -30,7 +30,7 @@ export interface FsEntry {
 }
 
 export interface FileSystem {
-  /** normalise a path (relative to cwd, or absolute / ~) — always returns an
+  /** normalise a path (relative to cwd, or absolute / ~) - always returns an
       absolute path; `..` past the root just clamps */
   resolve: (cwd: string, path: string) => string
   node: (absPath: string) => FsNode | null
@@ -75,7 +75,7 @@ function buildRoot(): FsDir {
   for (const job of experience) {
     experienceFiles[`${slug(job.company)}.txt`] = file(() =>
       [
-        `${job.role} — ${job.company}`,
+        `${job.role} - ${job.company}`,
         `${job.period}${job.location ? ` · ${job.location}` : ''}`,
         '',
         ...job.highlights.map((h) => `- ${h}`),
@@ -101,7 +101,7 @@ function buildRoot(): FsDir {
 
   return dir({
     'about.txt': file(() =>
-      [profile.name + ' — ' + profile.title, '', profile.tagline, '', profile.location, profile.email].join('\n'),
+      [profile.name + ' - ' + profile.title, '', profile.tagline, '', profile.location, profile.email].join('\n'),
     ),
     'contact.txt': file(
       () =>
@@ -114,7 +114,7 @@ function buildRoot(): FsDir {
       'contact',
     ),
     'cv.pdf': file(
-      () => `${profile.name} — ${profile.title}\n\n(binary document)`,
+      () => `${profile.name}, ${profile.title}\n\n(binary document)`,
       'resume',
     ),
     projects: dir(projectDirs),
@@ -122,7 +122,7 @@ function buildRoot(): FsDir {
     certifications: dir(certFiles),
     skills: dir(skillFiles),
     games: dir({
-      'pokemon.gba': file(() => 'Pokémon — Emerald Version (USA, Europe)', 'gba'),
+      'pokemon.gba': file(() => 'Pokémon - Emerald Version (USA, Europe)', 'gba'),
     }),
   })
 }
@@ -161,7 +161,7 @@ export function createFileSystem(): FileSystem {
   return fsApi(root)
 }
 
-/** The shared read-only portfolio filesystem — one instance for the whole app. */
+/** The shared read-only portfolio filesystem - one instance for the whole app. */
 export const portfolioFs: FileSystem = createFileSystem()
 
 function fsApi(root: FsDir): FileSystem {

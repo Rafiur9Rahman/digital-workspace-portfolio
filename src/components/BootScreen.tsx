@@ -153,7 +153,7 @@ export function BootScreen({
       style={{ willChange: 'opacity, transform, filter' }}
       className="fixed inset-0 z-50 flex select-none items-center justify-center overflow-hidden bg-desk-bg text-desk-text"
     >
-      {/* Ambient background — deliberately near-subliminal */}
+      {/* Ambient background - deliberately near-subliminal */}
       <div className="boot-drift pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-1/2 h-[70vmax] w-[70vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(91,140,255,0.15),transparent_60%)] blur-3xl" />
       </div>
@@ -256,7 +256,7 @@ export function BootScreen({
 }
 
 /* A progress bar rendered as discrete data blocks that switch on left-to-right.
-   No track/container — the blocks span the full row width (so every bar lines
+   No track/container - the blocks span the full row width (so every bar lines
    up), and the block count is derived from the measured width so they stay a
    consistent size regardless of screen size. */
 function Segments({

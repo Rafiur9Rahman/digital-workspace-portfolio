@@ -80,7 +80,7 @@ export function MatrixRain({ onExit }: { onExit: () => void }) {
       {reduce ? (
         <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center font-mono text-xs">
           <pre className="leading-tight text-[#2fe37e]">{'アイウエオ\n0110  1001\nﾊﾋﾌﾍﾎ'}</pre>
-          <p className="text-desk-muted">Reduced-motion mode — picture it raining.</p>
+          <p className="text-desk-muted">Reduced-motion mode - picture it raining.</p>
           <p className="text-desk-muted">Press ESC or click to exit.</p>
         </div>
       ) : (

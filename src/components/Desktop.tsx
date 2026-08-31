@@ -35,7 +35,7 @@ export function Desktop() {
         <Greeting />
         <DesktopIcons deskW={size.w} deskH={size.h} />
         {/* Windows stay mounted while minimised (Window.tsx hides them) so their
-            state — a running emulator, terminal history — survives. */}
+            state - a running emulator, terminal history - survives. */}
         <AnimatePresence>
           {windows.map((win) => (
             <Window key={win.id} win={win} deskW={size.w} deskH={size.h} />

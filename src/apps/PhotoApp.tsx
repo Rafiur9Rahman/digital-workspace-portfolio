@@ -17,7 +17,7 @@ export function PhotoApp() {
         </div>
       </div>
       <p className="font-mono text-[11px] text-desk-muted">
-        profile.jpg — 1600 × 1600
+        profile.jpg · 1600 × 1600
       </p>
     </div>
   )

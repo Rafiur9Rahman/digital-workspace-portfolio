@@ -9,7 +9,7 @@ import { ResumeApp } from '../apps/ResumeApp'
 import { PhotoApp } from '../apps/PhotoApp'
 import { ContactApp } from '../apps/ContactApp'
 import { ImagesApp } from '../apps/ImagesApp'
-// Lazy — the emulator glue + its ~570KB self-hosted runtime load only on open.
+// Lazy - the emulator glue + its ~570KB self-hosted runtime load only on open.
 import { GameBoyAdvanceAppLazy } from '../apps/GameBoyAdvanceApp.lazy'
 
 export type { AppId }

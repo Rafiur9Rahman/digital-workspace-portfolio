@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
-/* Ambient "matrix spillage" behind the desktop — sparse transient character
+/* Ambient "matrix spillage" behind the desktop - sparse transient character
    streams that spill down random columns and fade, plus the odd horizontal
    glitch tear. Deliberately faint: it's texture, not a screensaver. Sits below
    every window, is non-interactive, pauses when the tab is hidden, and renders

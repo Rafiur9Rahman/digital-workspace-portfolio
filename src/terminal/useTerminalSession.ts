@@ -43,7 +43,7 @@ export interface SessionDeps {
 export interface SessionState {
   lines: OutputLine[]
   input: string
-  /** submitted command lines, oldest first — powers ↑/↓ and `history` */
+  /** submitted command lines, oldest first - powers ↑/↓ and `history` */
   submitted: string[]
   /** cursor into `submitted`; === submitted.length means "editing a new line" */
   histCursor: number
@@ -258,7 +258,7 @@ export function useTerminalSession(deps: SessionDeps) {
       if (freshlyUnlocked.length) {
         dispatch({ type: 'toast', ids: freshlyUnlocked })
       }
-      // Rare harmless flavour — repeat visitors occasionally see something odd.
+      // Rare harmless flavour - repeat visitors occasionally see something odd.
       if (Math.random() < 0.01) {
         dispatch({
           type: 'append',

@@ -8,7 +8,7 @@ export interface ParsedLine {
 }
 
 /* Deliberately minimal: whitespace split, with single/double quoted groups kept
-   together. Not a real shell parser — no pipes, redirects, or variable
+   together. Not a real shell parser - no pipes, redirects, or variable
    expansion. */
 export function parseLine(raw: string): ParsedLine | null {
   const trimmed = raw.trim()

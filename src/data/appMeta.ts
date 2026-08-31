@@ -1,6 +1,6 @@
 /* React-free app metadata. Split out from apps.tsx so modules that only need
    ids / titles / icons (the terminal's `open` command, autocomplete, the file
-   explorer) can import it without pulling in every app component — which would
+   explorer) can import it without pulling in every app component - which would
    create an import cycle (apps.tsx → an app → back to apps). */
 
 export type AppId =

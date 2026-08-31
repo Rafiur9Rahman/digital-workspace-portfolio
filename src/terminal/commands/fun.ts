@@ -6,18 +6,18 @@ const JOKES = [
   'A SQL query walks into a bar, walks up to two tables and asks: "May I join you?"',
   'I would tell you a UDP joke, but you might not get it.',
   "There are only two hard problems in distributed systems: 2. exactly-once delivery 1. guaranteed order of messages 2. exactly-once delivery.",
-  '99 little bugs in the code — take one down, patch it around — 127 little bugs in the code.',
+  '99 little bugs in the code. Take one down, patch it around. 127 little bugs in the code.',
   'It works on my machine. Then we\'ll ship your machine.',
   'To understand recursion, see: "To understand recursion".',
 ]
 
 const QUOTES = [
-  'Programs must be written for people to read. — Abelson & Sussman',
-  'Simplicity is prerequisite for reliability. — Dijkstra',
-  'Make it work, make it right, make it fast. — Kent Beck',
-  "The cheapest, fastest and most reliable components are those that aren't there. — Gordon Bell",
-  'Talk is cheap. Show me the code. — Linus Torvalds',
-  'Good programmers write code humans can understand. — Martin Fowler',
+  'Programs must be written for people to read. - Abelson & Sussman',
+  'Simplicity is prerequisite for reliability. - Dijkstra',
+  'Make it work, make it right, make it fast. - Kent Beck',
+  "The cheapest, fastest and most reliable components are those that aren't there. - Gordon Bell",
+  'Talk is cheap. Show me the code. - Linus Torvalds',
+  'Good programmers write code humans can understand. - Martin Fowler',
 ]
 
 const pick = (list: string[]) => list[Math.floor(Math.random() * list.length)]
@@ -54,7 +54,7 @@ const roll: CommandDef = {
   },
 }
 
-/* Tiny recursive-descent arithmetic — no eval, no Function. */
+/* Tiny recursive-descent arithmetic - no eval, no Function. */
 function evaluate(src: string): number {
   const s = src.replace(/\s+/g, '')
   let i = 0
@@ -236,7 +236,7 @@ const git: CommandDef = {
     }
     if (sub === 'blame') return '100% Rafiur Rahman'
     if (sub === 'push') {
-      return { lines: [{ kind: 'error', text: 'remote: Permission denied — visitor is read-only.' }] }
+      return { lines: [{ kind: 'error', text: 'remote: Permission denied: visitor is read-only.' }] }
     }
     if (sub === 'commit') {
       const message = ctx.raw.match(/-m\s+["']?([^"']+)/)?.[1] ?? ''
@@ -250,7 +250,7 @@ const git: CommandDef = {
           ],
         }
       }
-      return { lines: [{ kind: 'error', text: 'nothing to commit — this is a read-only exhibit' }] }
+      return { lines: [{ kind: 'error', text: 'nothing to commit, this is a read-only exhibit' }] }
     }
     return { lines: [{ kind: 'muted', text: 'usage: git status | log | blame | push | commit -m "…"' }] }
   },

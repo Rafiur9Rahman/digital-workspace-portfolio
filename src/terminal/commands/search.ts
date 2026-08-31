@@ -73,15 +73,15 @@ const grep: CommandDef = {
       }
     }
     for (const p of projects) {
-      test('project', `${p.title} — ${p.summary}`)
+      test('project', `${p.title} - ${p.summary}`)
       test('tech', `${p.title}: ${p.tech.join(', ')}`)
       for (const o of p.outcomes) test('outcome', `${p.title}: ${o}`)
     }
     for (const [group, items] of Object.entries(skills)) {
       test('skill', `${group}: ${items.join(', ')}`)
     }
-    for (const job of experience) test('experience', `${job.role} — ${job.company}`)
-    for (const c of certifications) test('cert', `${c.name} — ${c.issuer}`)
+    for (const job of experience) test('experience', `${job.role} - ${job.company}`)
+    for (const c of certifications) test('cert', `${c.name} - ${c.issuer}`)
     return hits.length ? { lines: hits } : `No matches for "${ctx.args.join(' ')}".`
   },
 }
