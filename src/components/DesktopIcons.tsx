@@ -30,8 +30,8 @@ const ICONS: DeskIcon[] = [
    defaults are derived from fixed pixel spacing. Users drag icons anywhere
    and the new spot is remembered. */
 const COL_LEFT = 10 // px from the screen edge to the icon cell
-const COL_TOP = 10 // px from the top of the icon area
-const COL_STEP = 108 // px between icons in the column
+const COL_TOP = 14 // px from the top of the icon area
+const COL_STEP = 112 // px between icons in the column (cells are a fixed height)
 
 const STORE_KEY = 'ws-icons-v2'
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
@@ -236,7 +236,9 @@ function DraggableIcon({
       >
         {icon.glyph}
       </span>
-      <span className="text-[14px] leading-tight text-desk-text [text-shadow:0_1px_3px_rgba(0,0,0,0.85)]">
+      {/* Reserve two lines so every cell is the same height and the column
+          reads as an even rhythm regardless of label length. */}
+      <span className="flex min-h-[35px] items-start justify-center text-[14px] leading-tight text-desk-text [text-shadow:0_1px_3px_rgba(0,0,0,0.85)]">
         {icon.label}
       </span>
     </motion.button>

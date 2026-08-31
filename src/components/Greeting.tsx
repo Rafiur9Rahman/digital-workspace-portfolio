@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useWorkspace } from '../store/workspace'
 import { useWindows } from '../store/windows'
 import { shouldShowWelcome } from '../lib/welcome'
+import { useIsMobile } from '../lib/useIsMobile'
 import type { VisitInfo } from '../lib/visitor'
 
 type Bucket = 'night' | 'morning' | 'afternoon' | 'evening'
@@ -67,6 +68,7 @@ export function Greeting() {
   const power = useWorkspace((s) => s.power)
   const visit = useWorkspace((s) => s.visit)
   const hasWindows = useWindows((s) => s.windows.length > 0)
+  const mobile = useIsMobile()
   const reduce = useReducedMotion()
   const [visible, setVisible] = useState(true)
   const [text] = useState(() => greetingFor(visit))
@@ -87,17 +89,23 @@ export function Greeting() {
           just sit on top of the window, so it fades away. */}
       {visible && !hasWindows && (
         <motion.div
-          initial={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
+          initial={
+            reduce ? { opacity: 0 } : { opacity: 0, y: mobile ? 6 : -6 }
+          }
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
+          exit={{ opacity: 0, y: mobile ? 6 : -6 }}
           transition={{ duration: 0.5, delay: reduce ? 0 : 0.35 }}
-          className="pointer-events-none absolute inset-x-0 top-16 z-20 flex flex-col items-center gap-0.5 px-6 text-center"
+          className={`pointer-events-none absolute inset-x-0 z-20 flex flex-col items-center gap-0.5 px-6 text-center ${
+            mobile
+              ? 'bottom-[calc(6rem+env(safe-area-inset-bottom))]'
+              : 'top-16'
+          }`}
         >
-          <p className="text-sm text-desk-text [text-shadow:0_1px_10px_rgba(0,0,0,0.6)]">
+          <p className="text-sm text-desk-text [text-shadow:0_1px_10px_rgba(0,0,0,0.6)] sm:text-lg">
             {text.primary}
           </p>
           {text.secondary && (
-            <p className="text-xs text-desk-muted [text-shadow:0_1px_6px_rgba(0,0,0,0.6)]">
+            <p className="text-xs text-desk-muted [text-shadow:0_1px_6px_rgba(0,0,0,0.6)] sm:text-sm">
               {text.secondary}
             </p>
           )}
