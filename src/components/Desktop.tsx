@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { MenuBar } from './MenuBar'
+import { MatrixGlitch } from './MatrixGlitch'
 import { Dock } from './Dock'
 import { DesktopIcons } from './DesktopIcons'
 import { Launcher } from './Launcher'
@@ -24,6 +25,7 @@ export function Desktop() {
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(1200px_600px_at_70%_-10%,#1b2a55_0%,#0b1020_60%)]">
+      <MatrixGlitch />
       <MenuBar />
 
       {/* Window area sits between menu bar and screen bottom */}
