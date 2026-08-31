@@ -18,13 +18,20 @@ src/terminal/
 ├── autocomplete.ts        Tab completion (commands → app names → fs paths)
 ├── filesystem.ts          in-memory portfolio filesystem (read-only, no real disk)
 ├── achievements.ts        localStorage-backed achievements  (key: ws-terminal-v1)
+├── util.ts                sleep(), formatDuration()
 ├── useTerminalSession.ts  useReducer hook — the testable core; builds the context
 ├── commands/
 │   ├── portfolio.ts       help, about, projects, skills, experience, certifications,
-│   │                      contact, cv, github, whoami
-│   ├── navigation.ts      open
-│   ├── filesystem.ts      pwd, ls, cd, cat
-│   └── system.ts          clear, date, echo, history, achievements, reboot, shutdown
+│   │                      contact, cv, github, linkedin, source, whoami, credits,
+│   │                      license, changelog, tour
+│   ├── navigation.ts      open (alias: launch)
+│   ├── filesystem.ts      pwd, ls, cd, cat, mkdir/touch/rmdir/mv (read-only jokes)
+│   ├── system.ts          clear, date, echo, history, alias, theme, status, stats,
+│   │                      achievements, reboot, shutdown
+│   ├── sysinfo.ts         neofetch, uptime, hostname, uname, id, groups, env, version
+│   ├── windows.ts         ps/top/htop, apps, kill, focus, minimize, desktop
+│   ├── search.ts          tree, find, grep/search, file
+│   └── fun.ts             joke, quote/motd, coinflip, roll, calc, cowsay, ping, git
 └── easterEggs/
     ├── index.ts           matrix, coffee, 42, fortune, sudo, hack, rm, pokemon, party
     ├── data.ts            fortunes + the hack sequence
@@ -116,8 +123,21 @@ after the first command.
 | `ls [path]` | `dir` | Lists a directory — directories first (blue, trailing `/`), then files. |
 | `cd [path]` | | Change directory. No argument → `~` (root). Supports `.`, `..`, `~`, absolute and relative paths; `..` past the root clamps. The prompt updates: `visitor@rafiur:~/projects$`. |
 | `cat <file>` | | Prints a file. Files that map to an app append `→ run open <app> to launch the app`. |
-| `open <app>` | | Opens (or focuses, if already open) a real desktop window. |
+| `open <app>` | `launch` | Opens (or focuses, if already open) a real desktop window. |
 | `achievements` | `ach` | Shows `unlocked / total`. Unlocked ones are ticked; locked ones show only their vague hint (`??? — Follow the white rabbit.`) as a breadcrumb. |
+
+### More commands
+
+| group | commands |
+|---|---|
+| **system info** | `neofetch` (`systeminfo`, `banner`) · `uptime` · `hostname` · `uname [-a]` · `id` · `groups` · `env` (`printenv`) · `version` · `date` |
+| **window control** | `ps` (`top`, `htop`) · `apps` · `kill <app>` · `focus <app>` · `minimize <app>` · `desktop` (minimise all) |
+| **search** | `tree` (whole filesystem) · `find <term>` (file names) · `grep <term>` (`search`, portfolio content) · `file <path>` |
+| **git** | `git status` · `git log` · `git blame` · `git push` (denied) · `git commit -m "hire"` → opens Contact + *Root Access* |
+| **meta** | `alias` · `theme` · `status` · `stats` · `history -c` · `clear --all` |
+| **portfolio nav** | `linkedin` · `source` (`repo`) · `credits` · `license` · `changelog` · `tour` (`recruiter`, `tour --fast`) |
+| **fun** | `joke` · `quote` (`motd`) · `calc <expr>` (safe, no eval) · `ping [host]` (`ping recruiter` opens Contact) |
+| **hidden fun** | `cowsay <text>` · `coinflip` · `roll [sides]` · `mkdir`/`touch`/`rmdir`/`mv` (read-only jokes) |
 
 ### `open` targets
 

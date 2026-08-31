@@ -78,4 +78,32 @@ const cat: CommandDef = {
   },
 }
 
-export const filesystemCommands: CommandDef[] = [pwd, ls, cd, cat]
+/* The tree is a read-only exhibit — these just say so, playfully. */
+const readOnly = (name: string, aliases?: string[]): CommandDef => ({
+  name,
+  aliases,
+  summary: `${name} (read-only filesystem)`,
+  hidden: true,
+  run: (ctx) => ({
+    lines: [
+      {
+        kind: 'error',
+        text: `${name}: ${ctx.args[0] ?? ''}: cannot write — this filesystem is read-only`.replace(
+          ': :',
+          ':',
+        ),
+      },
+    ],
+  }),
+})
+
+export const filesystemCommands: CommandDef[] = [
+  pwd,
+  ls,
+  cd,
+  cat,
+  readOnly('mkdir'),
+  readOnly('touch'),
+  readOnly('rmdir'),
+  readOnly('mv'),
+]

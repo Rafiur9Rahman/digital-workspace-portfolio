@@ -128,5 +128,6 @@ export const certifications: Certification[] = [
 export const links = {
   github: 'https://github.com/Rafiur9Rahman',
   linkedin: '',
+  repo: 'https://github.com/Rafiur9Rahman/digital-workspace-portfolio',
   cv: '',
 }

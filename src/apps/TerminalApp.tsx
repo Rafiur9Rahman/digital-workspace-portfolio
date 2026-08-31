@@ -22,16 +22,43 @@ const KIND_CLASS: Record<LineKind, string> = {
 
 export function TerminalApp() {
   const openApp = useWindows((s) => s.openApp)
+  const windows = useWindows((s) => s.windows)
+  const closeWin = useWindows((s) => s.close)
+  const minimizeWin = useWindows((s) => s.minimize)
+  const restoreWin = useWindows((s) => s.restore)
   const reboot = useWorkspace((s) => s.reboot)
   const shutdown = useWorkspace((s) => s.shutdown)
+  const startedAt = useWorkspace((s) => s.startedAt)
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const winFor = (id: string) => windows.find((w) => w.appId === id)
 
   const { state, dispatch, submit } = useTerminalSession({
     openApp,
     openUrl: (url) => window.open(url, '_blank', 'noopener,noreferrer'),
     reboot,
     shutdown,
+    uptimeMs: () => Date.now() - startedAt,
+    listWindows: () =>
+      [...windows]
+        .sort((a, b) => a.z - b.z)
+        .map((w) => ({ appId: w.appId, title: w.title, minimized: w.minimized })),
+    closeApp: (id) => {
+      const w = winFor(id)
+      if (w) closeWin(w.id)
+    },
+    focusApp: (id) => {
+      const w = winFor(id)
+      if (w) restoreWin(w.id)
+    },
+    minimizeApp: (id) => {
+      const w = winFor(id)
+      if (w && !w.minimized) minimizeWin(w.id)
+    },
+    minimizeAll: () => {
+      for (const w of windows) if (!w.minimized) minimizeWin(w.id)
+    },
   })
 
   useEffect(() => {

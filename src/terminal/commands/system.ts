@@ -1,11 +1,18 @@
 import type { CommandDef, OutputLine } from '../types'
 import { ACHIEVEMENTS, getProgress } from '../achievements'
+import { formatDuration } from '../util'
 
 const clear: CommandDef = {
   name: 'clear',
   aliases: ['cls'],
   summary: 'clear the screen',
-  run: () => ({ clear: true }),
+  run: (ctx) => {
+    if (ctx.args[0] === '--all') {
+      ctx.clearHistory()
+      return { clear: true, lines: [{ kind: 'muted', text: 'Screen and history cleared.' }] }
+    }
+    return { clear: true }
+  },
 }
 
 const date: CommandDef = {
@@ -25,8 +32,65 @@ const history: CommandDef = {
   name: 'history',
   summary: 'show command history',
   run: (ctx) => {
+    if (ctx.args[0] === '-c') {
+      ctx.clearHistory()
+      return { lines: [{ kind: 'system', text: 'History cleared.' }] }
+    }
     if (ctx.history.length === 0) return 'No commands yet.'
     return ctx.history.map((cmd, i) => `${String(i + 1).padStart(4)}  ${cmd}`)
+  },
+}
+
+const alias: CommandDef = {
+  name: 'alias',
+  summary: 'list command aliases',
+  run: (ctx) => ({
+    lines: ctx
+      .listCommands()
+      .filter((c) => c.aliases?.length && !c.hidden)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((c) => ({ kind: 'output', text: `${c.name.padEnd(14)} ${c.aliases!.join(', ')}` })),
+  }),
+}
+
+const theme: CommandDef = {
+  name: 'theme',
+  summary: 'show the current theme',
+  run: (ctx) =>
+    ctx.args[0]
+      ? { lines: [{ kind: 'muted', text: "Only the 'dark' theme is available right now." }] }
+      : 'RafiurOS · dark',
+}
+
+const status: CommandDef = {
+  name: 'status',
+  summary: 'compact system status',
+  run: (ctx) => {
+    const open = ctx.listWindows().filter((w) => !w.minimized).length
+    const progress = getProgress()
+    return {
+      lines: [
+        { kind: 'output', text: `apps         ${open} open` },
+        { kind: 'output', text: `uptime       ${formatDuration(ctx.uptimeMs)}` },
+        { kind: 'output', text: `directory    ${ctx.cwd}` },
+        { kind: 'output', text: `achievements ${progress.unlocked.length}/${progress.total}` },
+      ],
+    }
+  },
+}
+
+const stats: CommandDef = {
+  name: 'stats',
+  summary: 'session stats',
+  run: (ctx) => {
+    const progress = getProgress()
+    return {
+      lines: [
+        { kind: 'output', text: `commands run   ${ctx.history.length}` },
+        { kind: 'output', text: `achievements   ${progress.unlocked.length}/${progress.total}` },
+        { kind: 'output', text: `uptime         ${formatDuration(ctx.uptimeMs)}` },
+      ],
+    }
   },
 }
 
@@ -83,6 +147,10 @@ export const systemCommands: CommandDef[] = [
   date,
   echo,
   history,
+  alias,
+  theme,
+  status,
+  stats,
   achievements,
   reboot,
   shutdown,

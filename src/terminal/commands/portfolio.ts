@@ -1,3 +1,4 @@
+import type { AppId } from '../../data/appMeta'
 import type { CommandDef, OutputLine } from '../types'
 import {
   certifications,
@@ -7,6 +8,7 @@ import {
   projects,
   skills,
 } from '../../data/content'
+import { sleep } from '../util'
 
 /* Two-column layout for `help` and similar. */
 function table(rows: [string, string][]): string {
@@ -156,6 +158,92 @@ const whoami: CommandDef = {
   run: () => 'visitor',
 }
 
+const linkedin: CommandDef = {
+  name: 'linkedin',
+  summary: 'open the LinkedIn profile',
+  run: (ctx) => {
+    if (!links.linkedin) return { lines: [{ kind: 'muted', text: 'LinkedIn link not published yet.' }] }
+    ctx.openUrl(links.linkedin)
+    return { lines: [{ kind: 'system', text: `Opening ${links.linkedin}` }] }
+  },
+}
+
+const source: CommandDef = {
+  name: 'source',
+  aliases: ['repo'],
+  summary: 'open the portfolio source code',
+  run: (ctx) => {
+    ctx.openUrl(links.repo)
+    return { lines: [{ kind: 'system', text: 'Opening the repository…' }] }
+  },
+}
+
+const credits: CommandDef = {
+  name: 'credits',
+  summary: 'what this site is built with',
+  run: () => ({
+    lines: [
+      { kind: 'output', text: 'Built with' },
+      { kind: 'muted', text: '  React · TypeScript · Vite · Zustand · Framer Motion · Tailwind CSS' },
+      { kind: 'muted', text: '  EmulatorJS + mGBA · Supabase · Vitest' },
+    ],
+  }),
+}
+
+const license: CommandDef = {
+  name: 'license',
+  summary: 'licence information',
+  run: () => `MIT © ${profile.name} — reuse the code, not the identity.`,
+}
+
+const changelog: CommandDef = {
+  name: 'changelog',
+  summary: 'recent additions',
+  run: () => ({
+    lines: [
+      { kind: 'output', text: 'Recent' },
+      { kind: 'muted', text: '  · Matrix glitch on the desktop background' },
+      { kind: 'muted', text: '  · Files app + minimise-to-dock' },
+      { kind: 'muted', text: '  · Terminal: filesystem, easter eggs, achievements' },
+      { kind: 'muted', text: '  · Game Boy Advance emulator' },
+    ],
+  }),
+}
+
+const tour: CommandDef = {
+  name: 'tour',
+  aliases: ['recruiter'],
+  summary: 'a guided walkthrough',
+  run: async (ctx) => {
+    if (/--fast/.test(ctx.raw)) {
+      const top = [...projects].sort((a, b) => b.difficulty - a.difficulty).slice(0, 2)
+      return {
+        lines: [
+          { kind: 'output', text: `${profile.name} — ${profile.title}` },
+          { kind: 'muted', text: profile.tagline },
+          { kind: 'muted', text: `${profile.location} · ${profile.email}` },
+          { kind: 'muted', text: `Top work: ${top.map((p) => p.title).join(', ')}` },
+          { kind: 'muted', text: 'Run `tour` for the walkthrough, or `open cv`.' },
+        ],
+      }
+    }
+    const steps: [AppId, string][] = [
+      ['about', 'Who I am'],
+      ['projects', 'Selected work'],
+      ['resume', 'The one-page CV'],
+      ['contact', 'How to reach me'],
+    ]
+    ctx.print({ kind: 'system', text: 'Starting the tour — opening apps as we go.' })
+    for (const [appId, label] of steps) {
+      if (ctx.signal.aborted) return
+      ctx.print({ kind: 'muted', text: `→ ${label}` })
+      ctx.openApp(appId)
+      if (!ctx.reducedMotion) await sleep(1100, ctx.signal)
+    }
+    return { lines: [{ kind: 'system', text: "That's the tour — thanks for stopping by." }] }
+  },
+}
+
 export const portfolioCommands: CommandDef[] = [
   help,
   about,
@@ -166,5 +254,11 @@ export const portfolioCommands: CommandDef[] = [
   contact,
   cv,
   github,
+  linkedin,
+  source,
   whoami,
+  credits,
+  license,
+  changelog,
+  tour,
 ]

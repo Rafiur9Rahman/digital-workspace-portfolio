@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 import type { AppId } from '../data/appMeta'
-import type { CommandResult, OutputLine, TerminalEffect } from './types'
+import type {
+  CommandResult,
+  OutputLine,
+  TerminalEffect,
+  TerminalWindow,
+} from './types'
 import { listCommands } from './registry'
 import { runLine } from './runner'
 import { portfolioFs } from './filesystem'
@@ -15,6 +20,12 @@ export interface SessionDeps {
   openUrl: (url: string) => void
   reboot: () => void
   shutdown: () => void
+  listWindows: () => TerminalWindow[]
+  closeApp: (id: AppId) => void
+  focusApp: (id: AppId) => void
+  minimizeApp: (id: AppId) => void
+  minimizeAll: () => void
+  uptimeMs: () => number
 }
 
 export interface SessionState {
@@ -54,6 +65,7 @@ export type SessionAction =
   | { type: 'historyNext' }
   | { type: 'toast'; ids: AchievementId[] }
   | { type: 'dismissToast' }
+  | { type: 'clearHistory' }
 
 export function reducer(state: SessionState, action: SessionAction): SessionState {
   switch (action.type) {
@@ -73,6 +85,8 @@ export function reducer(state: SessionState, action: SessionAction): SessionStat
       return { ...state, toasts: [...state.toasts, ...action.ids] }
     case 'dismissToast':
       return { ...state, toasts: state.toasts.slice(1) }
+    case 'clearHistory':
+      return { ...state, submitted: [], histCursor: 0 }
     case 'pushSubmitted':
       return {
         ...state,
@@ -194,6 +208,7 @@ export function useTerminalSession(deps: SessionDeps) {
         print: (line) => dispatch({ type: 'append', lines: [toLine(line)] }),
         signal: controller.signal,
         reducedMotion: prefersReducedMotion(),
+        uptimeMs: depsRef.current.uptimeMs(),
         openApp: (id) => depsRef.current.openApp(id),
         openUrl: (url) => depsRef.current.openUrl(url),
         reboot: () => depsRef.current.reboot(),
@@ -202,6 +217,12 @@ export function useTerminalSession(deps: SessionDeps) {
         unlock: (id) => {
           unlockAchievement(id)
         },
+        listWindows: () => depsRef.current.listWindows(),
+        closeApp: (id) => depsRef.current.closeApp(id),
+        focusApp: (id) => depsRef.current.focusApp(id),
+        minimizeApp: (id) => depsRef.current.minimizeApp(id),
+        minimizeAll: () => depsRef.current.minimizeAll(),
+        clearHistory: () => dispatch({ type: 'clearHistory' }),
       })
       applyResult(result)
       const freshlyUnlocked = getProgress().unlocked.filter(

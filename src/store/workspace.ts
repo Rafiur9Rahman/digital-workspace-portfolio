@@ -5,6 +5,8 @@ export type WorkspacePower = 'booting' | 'running' | 'shutdown'
 
 interface WorkspaceStore {
   power: WorkspacePower
+  /** when this browser session started — for `uptime` / `neofetch` */
+  startedAt: number
   /** replay the cinematic boot, landing on a clean desktop */
   reboot: () => void
   /** fake OS power-off — ShutdownScreen owns the screen until powerOn/reboot */
@@ -19,6 +21,7 @@ interface WorkspaceStore {
    useWindows, which `reboot` clears via its own `closeAll`. */
 export const useWorkspace = create<WorkspaceStore>((set) => ({
   power: 'booting',
+  startedAt: Date.now(),
   reboot: () => {
     useWindows.getState().closeAll()
     set({ power: 'booting' })

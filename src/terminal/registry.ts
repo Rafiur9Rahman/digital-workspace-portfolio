@@ -3,6 +3,10 @@ import { portfolioCommands } from './commands/portfolio'
 import { navigationCommands } from './commands/navigation'
 import { filesystemCommands } from './commands/filesystem'
 import { systemCommands } from './commands/system'
+import { sysinfoCommands } from './commands/sysinfo'
+import { windowCommands } from './commands/windows'
+import { searchCommands } from './commands/search'
+import { funCommands } from './commands/fun'
 import { easterEggCommands } from './easterEggs'
 
 const MODULES: CommandDef[][] = [
@@ -10,6 +14,10 @@ const MODULES: CommandDef[][] = [
   navigationCommands,
   filesystemCommands,
   systemCommands,
+  sysinfoCommands,
+  windowCommands,
+  searchCommands,
+  funCommands,
   easterEggCommands,
 ]
 

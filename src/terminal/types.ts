@@ -11,6 +11,12 @@ export interface OutputLine {
 
 export type TerminalEffect = 'matrix' | 'party'
 
+export interface TerminalWindow {
+  appId: AppId
+  title: string
+  minimized: boolean
+}
+
 /* What a command hands back. A bare string / string[] is shorthand for
    'output' lines; the object form covers everything else. */
 export type CommandResult =
@@ -43,6 +49,8 @@ export interface CommandContext {
   signal: AbortSignal
   /** the visitor prefers reduced motion — skip animated buildup, show the result */
   reducedMotion: boolean
+  /** ms since the workspace session started */
+  uptimeMs: number
 
   // --- controlled OS actions: commands never touch React or the DOM directly ---
   openApp: (id: AppId) => void
@@ -51,6 +59,14 @@ export interface CommandContext {
   shutdown: () => void
   setCwd: (path: string) => void
   unlock: (id: AchievementId) => void
+  /** open windows, front-most last */
+  listWindows: () => TerminalWindow[]
+  closeApp: (id: AppId) => void
+  focusApp: (id: AppId) => void
+  minimizeApp: (id: AppId) => void
+  minimizeAll: () => void
+  /** wipe the ↑/↓ command history for this session */
+  clearHistory: () => void
 }
 
 export interface CommandDef {

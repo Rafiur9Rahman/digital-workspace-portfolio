@@ -1,21 +1,7 @@
 import { APP_TITLES } from '../../data/appMeta'
 import type { CommandDef, OutputLine } from '../types'
+import { sleep } from '../util'
 import { FORTUNES, HACK_SEQUENCE } from './data'
-
-function sleep(ms: number, signal: AbortSignal): Promise<void> {
-  return new Promise((resolve) => {
-    if (signal.aborted) return resolve()
-    const timer = setTimeout(resolve, ms)
-    signal.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer)
-        resolve()
-      },
-      { once: true },
-    )
-  })
-}
 
 const bar = (fraction: number, width = 20) => {
   const filled = Math.round(fraction * width)

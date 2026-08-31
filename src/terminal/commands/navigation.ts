@@ -20,6 +20,7 @@ export function resolveApp(name: string): AppId | null {
 
 const open: CommandDef = {
   name: 'open',
+  aliases: ['launch'],
   summary: 'open an app window',
   usage: 'open <app>',
   run: (ctx) => {
