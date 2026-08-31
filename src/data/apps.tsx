@@ -21,18 +21,28 @@ export interface AppDef {
   icon: string
   component: ComponentType | LazyExoticComponent<ComponentType>
   defaultSize: { width: number; height: number }
+  /** open filling the desktop; the user can un-maximize it afterwards */
+  openMaximized?: boolean
 }
 
 const meta = (
   id: AppId,
   component: AppDef['component'],
   defaultSize: AppDef['defaultSize'],
-): AppDef => ({ id, title: APP_TITLES[id], icon: APP_ICONS[id], component, defaultSize })
+  opts?: { openMaximized?: boolean },
+): AppDef => ({
+  id,
+  title: APP_TITLES[id],
+  icon: APP_ICONS[id],
+  component,
+  defaultSize,
+  ...opts,
+})
 
 export const APPS: Record<AppId, AppDef> = {
   assistant: meta('assistant', AssistantApp, { width: 460, height: 520 }),
   files: meta('files', FilesApp, { width: 560, height: 440 }),
-  map: meta('map', WorkspaceMapApp, { width: 900, height: 620 }),
+  map: meta('map', WorkspaceMapApp, { width: 900, height: 620 }, { openMaximized: true }),
   projects: meta('projects', ProjectsApp, { width: 640, height: 460 }),
   about: meta('about', AboutApp, { width: 560, height: 480 }),
   terminal: meta('terminal', TerminalApp, { width: 680, height: 460 }),

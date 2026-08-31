@@ -63,7 +63,8 @@ export function Window({ win, deskW, deskH }: Props) {
     height.set(bounds.height)
   }, [bounds.width, bounds.height, width, height])
 
-  // Restore the last size/position this app was left at (once, desktop only).
+  // On desktop, once: restore the size/position this app was last left at.
+  // If there is none and the app opts into it, open filling the desktop.
   const appliedRef = useRef(false)
   useEffect(() => {
     if (appliedRef.current || !canResize) return
@@ -72,8 +73,10 @@ export function Window({ win, deskW, deskH }: Props) {
     if (saved) {
       move(win.id, saved.x, saved.y)
       resize(win.id, saved.width, saved.height)
+    } else if (APPS[win.appId].openMaximized && !win.maximized) {
+      toggleMaximize(win.id, deskW, deskH)
     }
-  }, [canResize, win.appId, win.id, move, resize])
+  }, [canResize, win.appId, win.id, win.maximized, deskW, deskH, move, resize, toggleMaximize])
 
   const persist = () => {
     if (canResize && !win.maximized) {
