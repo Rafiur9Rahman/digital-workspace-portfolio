@@ -5,15 +5,23 @@ const COLS = 24
 const ROWS = 16
 const CELL = 18
 const SPEED_MS = 115
+const FOOD_COUNT = 3
+const BONUS_CHANCE = 0.28 // odds a new food is worth 3 instead of 1
 
 interface Cell {
   x: number
   y: number
 }
 
-/* A small Snake, scoped to the terminal content area. Arrows / WASD to steer,
-   Space to restart, Esc to quit. High score persists in ws-terminal-prefs-v1.
-   The rAF loop + key listener are cleaned up on unmount. */
+interface Food extends Cell {
+  value: 1 | 3
+}
+
+/* A small Snake, scoped to the terminal content area. Several pieces of food on
+   the board at once; the blue ones are worth 3, the red ones 1, picked at
+   random. Arrows / WASD to steer, Space to restart, Esc to quit. High score
+   persists in ws-terminal-prefs-v1. rAF loop + key listener cleaned up on
+   unmount. */
 export function Snake({ onExit }: { onExit: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [score, setScore] = useState(0)
@@ -32,42 +40,50 @@ export function Snake({ onExit }: { onExit: () => void }) {
     canvas.width = COLS * CELL
     canvas.height = ROWS * CELL
 
-    let snake: Cell[] = [
+    const START: Cell[] = [
       { x: 6, y: 8 },
       { x: 5, y: 8 },
       { x: 4, y: 8 },
     ]
+
+    let snake: Cell[] = START.map((c) => ({ ...c }))
     let dir: Cell = { x: 1, y: 0 }
     let queued: Cell = dir
-    let food = spawnFood()
+    let foods: Food[] = []
     let alive = true
     let points = 0
 
-    function spawnFood(): Cell {
-      let f: Cell
-      do {
-        f = {
-          x: Math.floor(Math.random() * COLS),
-          y: Math.floor(Math.random() * ROWS),
+    function occupied(x: number, y: number): boolean {
+      return (
+        snake.some((s) => s.x === x && s.y === y) ||
+        foods.some((f) => f.x === x && f.y === y)
+      )
+    }
+
+    function topUpFood() {
+      let guard = 0
+      while (foods.length < FOOD_COUNT && guard++ < 300) {
+        const x = Math.floor(Math.random() * COLS)
+        const y = Math.floor(Math.random() * ROWS)
+        if (!occupied(x, y)) {
+          foods.push({ x, y, value: Math.random() < BONUS_CHANCE ? 3 : 1 })
         }
-      } while (snake.some((s) => s.x === f.x && s.y === f.y))
-      return f
+      }
     }
 
     function restart() {
-      snake = [
-        { x: 6, y: 8 },
-        { x: 5, y: 8 },
-        { x: 4, y: 8 },
-      ]
+      snake = START.map((c) => ({ ...c }))
       dir = { x: 1, y: 0 }
       queued = dir
-      food = spawnFood()
+      foods = []
+      topUpFood()
       alive = true
       points = 0
       setScore(0)
       setDead(false)
     }
+
+    topUpFood()
 
     const TURNS: Record<string, Cell> = {
       arrowup: { x: 0, y: -1 },
@@ -114,10 +130,12 @@ export function Snake({ onExit }: { onExit: () => void }) {
         return
       }
       snake.unshift(head)
-      if (head.x === food.x && head.y === food.y) {
-        points += 1
+      const eaten = foods.findIndex((f) => f.x === head.x && f.y === head.y)
+      if (eaten !== -1) {
+        points += foods[eaten].value
         setScore(points)
-        food = spawnFood()
+        foods.splice(eaten, 1)
+        topUpFood()
       } else {
         snake.pop()
       }
@@ -128,12 +146,25 @@ export function Snake({ onExit }: { onExit: () => void }) {
       const dim = css.getPropertyValue('--td').trim() || '#8b97b8'
       const ok = css.getPropertyValue('--tk').trim() || '#34d399'
       const err = css.getPropertyValue('--te').trim() || '#f87171'
+      const accent = css.getPropertyValue('--ta').trim() || '#7aa2f7'
+      const fg = css.getPropertyValue('--tf').trim() || '#d7dcef'
       const bg = css.getPropertyValue('--tb').trim() || '#0b1020'
 
       ctx.fillStyle = bg
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-      ctx.fillStyle = err
-      ctx.fillRect(food.x * CELL + 3, food.y * CELL + 3, CELL - 6, CELL - 6)
+
+      for (const f of foods) {
+        if (f.value === 3) {
+          ctx.fillStyle = accent
+          ctx.fillRect(f.x * CELL + 2, f.y * CELL + 2, CELL - 4, CELL - 4)
+          ctx.fillStyle = fg
+          ctx.fillRect(f.x * CELL + 6, f.y * CELL + 6, CELL - 12, CELL - 12)
+        } else {
+          ctx.fillStyle = err
+          ctx.fillRect(f.x * CELL + 3, f.y * CELL + 3, CELL - 6, CELL - 6)
+        }
+      }
+
       snake.forEach((s, i) => {
         ctx.fillStyle = i === 0 ? ok : dim
         ctx.fillRect(s.x * CELL + 1, s.y * CELL + 1, CELL - 2, CELL - 2)
@@ -173,8 +204,8 @@ export function Snake({ onExit }: { onExit: () => void }) {
       <canvas ref={canvasRef} className="rounded border border-white/10" />
       <p className="text-[11px] text-[var(--td)]">
         {dead
-          ? 'game over - Space to restart · Esc to quit'
-          : 'arrows / wasd to steer · Esc to quit'}
+          ? 'game over. Space to restart · Esc to quit'
+          : 'arrows / wasd to steer · blue food = 3 · Esc to quit'}
       </p>
     </div>
   )
