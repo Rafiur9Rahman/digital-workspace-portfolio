@@ -21,6 +21,7 @@ function run(name: string, over: Partial<CommandContext> = {}): CommandResult | 
     terminalTheme: 'dark',
     uptimeMs: 0,
     openApp: () => {},
+    openAppWith: () => {},
     openUrl: () => {},
     reboot: () => {},
     shutdown: () => {},

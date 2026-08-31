@@ -21,6 +21,7 @@ function ctx(over: Partial<CommandContext> = {}): CommandContext {
     terminalTheme: 'dark',
     uptimeMs: 0,
     openApp: () => {},
+    openAppWith: () => {},
     openUrl: () => {},
     reboot: () => {},
     shutdown: () => {},

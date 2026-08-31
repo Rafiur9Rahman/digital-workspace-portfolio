@@ -70,6 +70,7 @@ const KIND_CLASS: Record<LineKind, string> = {
 
 export function TerminalApp() {
   const openApp = useWindows((s) => s.openApp)
+  const openAppWith = useWindows((s) => s.openAppWith)
   const windows = useWindows((s) => s.windows)
   const closeWin = useWindows((s) => s.close)
   const minimizeWin = useWindows((s) => s.minimize)
@@ -85,6 +86,7 @@ export function TerminalApp() {
 
   const { state, dispatch, submit } = useTerminalSession({
     openApp,
+    openAppWith,
     openUrl: (url) => window.open(url, '_blank', 'noopener,noreferrer'),
     reboot,
     shutdown,

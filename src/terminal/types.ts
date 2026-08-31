@@ -60,6 +60,8 @@ export interface CommandContext {
 
   // --- controlled OS actions: commands never touch React or the DOM directly ---
   openApp: (id: AppId) => void
+  /** open an app and hand it a record / topic to select on arrival */
+  openAppWith: (id: AppId, ref: string) => void
   openUrl: (url: string) => void
   reboot: () => void
   shutdown: () => void

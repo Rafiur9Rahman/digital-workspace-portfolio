@@ -18,6 +18,7 @@ function ctx(over: Partial<CommandContext> = {}): CommandContext {
     terminalTheme: 'dark',
     uptimeMs: 90_000,
     openApp: () => {},
+    openAppWith: () => {},
     openUrl: () => {},
     reboot: () => {},
     shutdown: () => {},
@@ -95,6 +96,25 @@ describe('window control', () => {
   it('apps marks running ones', async () => {
     const text = textOf(await run('apps', { listWindows: () => openWindows(['terminal', false]) }))
     expect(text).toContain('● ')
+  })
+})
+
+describe('map', () => {
+  it('bare map opens the Workspace Map', async () => {
+    const openApp = vi.fn()
+    const text = textOf(await run('map', { openApp }))
+    expect(openApp).toHaveBeenCalledWith('map')
+    expect(text).toContain('Workspace Map')
+  })
+  it('map <topic> opens it on that topic', async () => {
+    const openAppWith = vi.fn()
+    await run('map', { args: ['azure'], openAppWith })
+    expect(openAppWith).toHaveBeenCalledWith('map', 'azure')
+  })
+  it('map joins a multi-word topic', async () => {
+    const openAppWith = vi.fn()
+    await run('map', { args: ['ai', '&', 'data'], openAppWith })
+    expect(openAppWith).toHaveBeenCalledWith('map', 'ai & data')
   })
 })
 

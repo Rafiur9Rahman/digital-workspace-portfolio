@@ -1,4 +1,11 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   buildWorkspaceGraph,
@@ -8,6 +15,12 @@ import {
   type WorkspaceGraph,
 } from '../lib/workspaceGraph'
 import { forceLayout } from '../lib/graphLayout'
+import {
+  computeViewSet,
+  VIEW_ALIASES,
+  VIEWS,
+  type ViewId,
+} from '../lib/workspaceViews'
 import { certifications, experience, projects } from '../data/content'
 import type { AppId } from '../data/appMeta'
 import { useWindows } from '../store/windows'
@@ -16,8 +29,10 @@ import { useWindows } from '../store/windows'
    Phase 1: static, pannable, zoomable relationship index.
    Phase 2: click a node to enter focus mode - it moves to the centre, its
    direct connections fan out on a ring, everything else dims. A breadcrumb
-   records the path you walked; click any crumb to jump back. Esc or a click
-   on empty canvas returns to the overview. */
+   records the path you walked; click any crumb to jump back.
+   Phase 3: a side panel with the focused node's full record and connections.
+   Phase 4: curated views, category filters and search across the top; the
+   terminal `map <topic>` command drives all three. */
 
 const CANVAS_W = 960
 const CANVAS_H = 640
@@ -56,6 +71,14 @@ const CONNECTION_ORDER: NodeType[] = [
   'experience',
   'certification',
   'profile',
+]
+
+/** The categories the top filter bar toggles (profile is always on). */
+const CATEGORY_FILTERS: NodeType[] = [
+  'project',
+  'skill',
+  'experience',
+  'certification',
 ]
 
 /** Overview visible set: everything except low-signal ad-hoc tech leaves. */
@@ -108,35 +131,63 @@ function boxFor(type: NodeType): NodeBox {
 }
 
 export function WorkspaceMapApp() {
-  const { g, forcePos, baseVisible, stats } = useMemo(() => {
+  const { g, baseVisible } = useMemo(() => {
     const g = buildWorkspaceGraph()
-    const visible = g.nodes.filter(isVisible)
-    const baseVisible = new Set(visible.map((n) => n.id))
-    const visibleEdges = g.edges.filter(
-      (e) => baseVisible.has(e.source) && baseVisible.has(e.target),
-    )
-    const forcePos = forceLayout(visible, visibleEdges, {
-      width: CANVAS_W,
-      height: CANVAS_H,
-      seed: 20260831,
-    })
-    return {
-      g,
-      forcePos,
-      baseVisible,
-      stats: {
-        nodes: visible.length,
-        edges: visibleEdges.length,
-        categories: new Set(
-          visible.map((n) => n.type).filter((t) => t !== 'profile'),
-        ).size,
-      },
-    }
+    const baseVisible = new Set(g.nodes.filter(isVisible).map((n) => n.id))
+    return { g, baseVisible }
   }, [])
 
   // The path of focused nodes; the last one is the current focus.
   const [trail, setTrail] = useState<string[]>([])
   const focusId = trail.length ? trail[trail.length - 1] : null
+
+  const [view, setView] = useState<ViewId>('all')
+  const [cats, setCats] = useState<Set<NodeType>>(
+    () => new Set(CATEGORY_FILTERS),
+  )
+
+  const viewSet = useMemo(() => computeViewSet(view, g), [view, g])
+
+  /** Overview visible set: base graph, narrowed by the view and the filters. */
+  const activeVisible = useMemo(() => {
+    const s = new Set<string>()
+    for (const n of g.nodes) {
+      if (!baseVisible.has(n.id) || !viewSet.has(n.id)) continue
+      if (n.type !== 'profile' && !cats.has(n.type)) continue
+      s.add(n.id)
+    }
+    return s
+  }, [g, baseVisible, viewSet, cats])
+
+  // Re-run the layout whenever the visible set changes; nodes glide to place.
+  const overviewPos = useMemo(() => {
+    const nodes = g.nodes.filter((n) => activeVisible.has(n.id))
+    const edges = g.edges.filter(
+      (e) => activeVisible.has(e.source) && activeVisible.has(e.target),
+    )
+    return forceLayout(nodes, edges, {
+      width: CANVAS_W,
+      height: CANVAS_H,
+      seed: 20260831,
+    })
+  }, [g, activeVisible])
+
+  const stats = useMemo(
+    () => ({
+      nodes: activeVisible.size,
+      edges: g.edges.filter(
+        (e) => activeVisible.has(e.source) && activeVisible.has(e.target),
+      ).length,
+      categories: new Set(
+        [...activeVisible]
+          .map((id) => g.byId.get(id)!.type)
+          .filter((t) => t !== 'profile'),
+      ).size,
+    }),
+    [g, activeVisible],
+  )
+
+  const allCatsOn = cats.size === CATEGORY_FILTERS.length
 
   const [zoom, setZoom] = useState(0.85)
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -147,6 +198,8 @@ export function WorkspaceMapApp() {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const reduce = useReducedMotion()
   const openAppWith = useWindows((s) => s.openAppWith)
+  const focusRequest = useWindows((s) => s.focusRequest)
+  const clearFocusRequest = useWindows((s) => s.clearFocusRequest)
 
   const nbrSet = useMemo(
     () => new Set(focusId ? [...(g.neighbors.get(focusId) ?? [])] : []),
@@ -155,8 +208,8 @@ export function WorkspaceMapApp() {
 
   /** Focus mode: focused node centred, direct connections on a ring. */
   const layout = useMemo(() => {
-    if (!focusId) return forcePos
-    const m = new Map(forcePos)
+    if (!focusId) return overviewPos
+    const m = new Map(overviewPos)
     m.set(focusId, { x: CX, y: CY })
     const ring = [...nbrSet]
       .filter((id) => g.byId.has(id))
@@ -174,36 +227,46 @@ export function WorkspaceMapApp() {
       m.set(id, { x: CX + Math.cos(ang) * R, y: CY + Math.sin(ang) * R })
     })
     return m
-  }, [g, focusId, nbrSet, forcePos])
+  }, [g, focusId, nbrSet, overviewPos])
 
-  const posOf = (id: string) => layout.get(id) ?? forcePos.get(id) ?? { x: CX, y: CY }
+  const posOf = (id: string) =>
+    layout.get(id) ?? overviewPos.get(id) ?? { x: CX, y: CY }
 
   const opacityOf = (id: string) => {
-    if (!focusId) return baseVisible.has(id) ? 1 : 0
+    if (!focusId) return activeVisible.has(id) ? 1 : 0
     if (id === focusId || nbrSet.has(id)) return 1
-    return baseVisible.has(id) ? 0.12 : 0
+    return activeVisible.has(id) ? 0.12 : 0
   }
 
   const edgeOpacity = (e: GraphEdge) => {
     if (!focusId) {
-      return baseVisible.has(e.source) && baseVisible.has(e.target) ? 0.9 : 0
+      return activeVisible.has(e.source) && activeVisible.has(e.target) ? 0.9 : 0
     }
     if (e.source === focusId || e.target === focusId) return 0.95
     const a = nbrSet.has(e.source)
     const b = nbrSet.has(e.target)
     if (a && b) return 0.28
-    if (baseVisible.has(e.source) && baseVisible.has(e.target)) return 0.05
+    if (activeVisible.has(e.source) && activeVisible.has(e.target)) return 0.05
     return 0
   }
 
-  const focusNode = (id: string) => {
+  const focusNode = useCallback((id: string) => {
     setTrail((prev) => {
       const at = prev.indexOf(id)
       return at !== -1 ? prev.slice(0, at + 1) : [...prev, id]
     })
     setPan({ x: 0, y: 0 })
-  }
+  }, [])
   const exitFocus = () => setTrail([])
+
+  const toggleCat = (c: NodeType) =>
+    setCats((prev) => {
+      const next = new Set(prev)
+      if (next.has(c)) next.delete(c)
+      else next.add(c)
+      return next
+    })
+  const enableAllCats = () => setCats(new Set(CATEGORY_FILTERS))
 
   // Fallback for Esc when the canvas itself does not hold DOM focus.
   useEffect(() => {
@@ -214,6 +277,23 @@ export function WorkspaceMapApp() {
     window.addEventListener('keydown', onEsc)
     return () => window.removeEventListener('keydown', onEsc)
   }, [focusId])
+
+  // `map <topic>` from the terminal: switch to a view, or focus a node.
+  useEffect(() => {
+    if (focusRequest?.appId !== 'map') return
+    const raw = focusRequest.ref.trim().toLowerCase()
+    clearFocusRequest()
+    if (!raw) return
+    if (VIEW_ALIASES[raw]) {
+      setView(VIEW_ALIASES[raw])
+      return
+    }
+    const hit =
+      g.nodes.find((n) => n.label.toLowerCase() === raw) ??
+      g.nodes.find((n) => n.label.toLowerCase().includes(raw)) ??
+      g.nodes.find((n) => n.id.toLowerCase().includes(raw))
+    if (hit) focusNode(hit.id)
+  }, [focusRequest, clearFocusRequest, g, focusNode])
 
   const reset = () => {
     setZoom(0.85)
@@ -287,6 +367,47 @@ export function WorkspaceMapApp() {
           Relationship index // Projects • Skills • Experience • Certifications
         </p>
       </header>
+
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-desk-edge px-4 py-2">
+        <div className="flex items-center gap-1">
+          <span className="mr-1 text-[9px] uppercase tracking-[0.2em] text-desk-muted">
+            View
+          </span>
+          {VIEWS.map((v) => (
+            <ToolbarChip
+              key={v.id}
+              active={view === v.id}
+              onClick={() => setView(v.id)}
+            >
+              {v.label}
+            </ToolbarChip>
+          ))}
+        </div>
+
+        <span className="h-4 w-px bg-desk-edge" />
+
+        <div className="flex items-center gap-1">
+          <ToolbarChip active={allCatsOn} onClick={enableAllCats}>
+            All
+          </ToolbarChip>
+          {CATEGORY_FILTERS.map((c) => (
+            <ToolbarChip
+              key={c}
+              active={cats.has(c)}
+              onClick={() => toggleCat(c)}
+            >
+              {TYPE_PLURAL[c]}
+            </ToolbarChip>
+          ))}
+        </div>
+
+        <div className="ml-auto">
+          <SearchBox
+            nodes={g.nodes.filter((n) => !n.adHoc || n.degree >= 1)}
+            onPick={focusNode}
+          />
+        </div>
+      </div>
 
       <div className="flex min-h-0 flex-1">
       <div
@@ -468,6 +589,104 @@ export function WorkspaceMapApp() {
             }`
           : `${stats.nodes} nodes • ${stats.edges} relationships • ${stats.categories} categories`}
       </footer>
+    </div>
+  )
+}
+
+function ToolbarChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-widest transition-colors ${
+        active
+          ? 'border-desk-accent/60 bg-desk-accent/15 text-desk-text'
+          : 'border-desk-edge text-desk-muted hover:text-desk-text'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
+function SearchBox({
+  nodes,
+  onPick,
+}: {
+  nodes: GraphNode[]
+  onPick: (id: string) => void
+}) {
+  const [q, setQ] = useState('')
+  const [open, setOpen] = useState(false)
+
+  const query = q.trim().toLowerCase()
+  const matches = query
+    ? nodes
+        .filter((n) => n.label.toLowerCase().includes(query))
+        .sort((a, b) => {
+          const ai = a.label.toLowerCase().startsWith(query) ? 0 : 1
+          const bi = b.label.toLowerCase().startsWith(query) ? 0 : 1
+          return ai - bi || a.label.localeCompare(b.label)
+        })
+        .slice(0, 8)
+    : []
+
+  const pick = (id: string) => {
+    onPick(id)
+    setQ('')
+    setOpen(false)
+  }
+
+  return (
+    <div className="relative">
+      <input
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value)
+          setOpen(true)
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => window.setTimeout(() => setOpen(false), 120)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && matches[0]) pick(matches[0].id)
+          else if (e.key === 'Escape') {
+            setQ('')
+            setOpen(false)
+            ;(e.target as HTMLInputElement).blur()
+          }
+        }}
+        placeholder="Search the map"
+        aria-label="Search the map"
+        className="w-40 rounded border border-desk-edge bg-desk-bg px-2 py-1 text-[11px] text-desk-text placeholder:text-desk-muted focus:border-desk-accent focus:outline-none"
+      />
+      {open && matches.length > 0 && (
+        <ul className="absolute right-0 z-40 mt-1 w-56 overflow-hidden rounded border border-desk-edge bg-desk-panel shadow-lg">
+          {matches.map((n) => (
+            <li key={n.id}>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => pick(n.id)}
+                className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-[11px] text-desk-text hover:bg-desk-edge/40"
+              >
+                <span className="truncate">{n.label}</span>
+                <span className="shrink-0 text-[9px] uppercase tracking-widest text-desk-muted">
+                  {n.type}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

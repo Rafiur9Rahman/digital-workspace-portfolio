@@ -28,6 +28,7 @@ const ANOMALIES = [
 
 export interface SessionDeps {
   openApp: (id: AppId) => void
+  openAppWith: (id: AppId, ref: string) => void
   openUrl: (url: string) => void
   reboot: () => void
   shutdown: () => void
@@ -236,6 +237,7 @@ export function useTerminalSession(deps: SessionDeps) {
         uptimeMs: depsRef.current.uptimeMs(),
         terminalTheme: current.theme,
         openApp: (id) => depsRef.current.openApp(id),
+        openAppWith: (id, ref) => depsRef.current.openAppWith(id, ref),
         openUrl: (url) => depsRef.current.openUrl(url),
         reboot: () => depsRef.current.reboot(),
         shutdown: () => depsRef.current.shutdown(),

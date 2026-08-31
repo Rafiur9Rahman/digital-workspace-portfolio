@@ -1,6 +1,7 @@
 import type { CommandDef } from './types'
 import { portfolioCommands } from './commands/portfolio'
 import { navigationCommands } from './commands/navigation'
+import { mapCommands } from './commands/map'
 import { filesystemCommands } from './commands/filesystem'
 import { systemCommands } from './commands/system'
 import { sysinfoCommands } from './commands/sysinfo'
@@ -12,6 +13,7 @@ import { easterEggCommands } from './easterEggs'
 const MODULES: CommandDef[][] = [
   portfolioCommands,
   navigationCommands,
+  mapCommands,
   filesystemCommands,
   systemCommands,
   sysinfoCommands,

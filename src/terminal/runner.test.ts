@@ -18,6 +18,7 @@ function baseCtx(over: Partial<BaseContext> = {}): BaseContext {
     terminalTheme: 'dark',
     uptimeMs: 0,
     openApp: () => {},
+    openAppWith: () => {},
     openUrl: () => {},
     reboot: () => {},
     shutdown: () => {},
