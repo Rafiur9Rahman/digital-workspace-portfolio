@@ -1,7 +1,7 @@
 import { beforeEach, vi } from 'vitest'
 
-/* Minimal in-memory localStorage for the 'node' test environment — enough for
-   the achievements store. Cleared before every test. */
+/* Minimal in-memory localStorage + sessionStorage for the 'node' test
+   environment. Cleared before every test. */
 class MemoryStorage {
   #data = new Map<string, string>()
   get length(): number {
@@ -25,7 +25,9 @@ class MemoryStorage {
 }
 
 vi.stubGlobal('localStorage', new MemoryStorage())
+vi.stubGlobal('sessionStorage', new MemoryStorage())
 
 beforeEach(() => {
   localStorage.clear()
+  sessionStorage.clear()
 })

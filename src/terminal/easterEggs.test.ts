@@ -32,6 +32,7 @@ function ctx(over: Partial<CommandContext> = {}): CommandContext {
     minimizeApp: () => {},
     minimizeAll: () => {},
     clearHistory: () => {},
+    forgetMe: () => {},
     ...over,
   }
 }

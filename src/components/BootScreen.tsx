@@ -2,13 +2,16 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 /* ---------------------------------------------------------------------------
-   Timing — the whole cinematic run targets ~5s, then a polished hand-off.
-   Tweak these three numbers to change the overall length.
+   Timing. First visit gets the full ~5s cinematic; returning visitors get a
+   trimmed ~2.7s run of the same animation (`fast`). The curve / process /
+   message tables below are fractions of the script, so they scale for free.
 --------------------------------------------------------------------------- */
-const SCRIPT_MS = 4150 // animated boot (bars + rolling messages)
-const SYSTEMS_MS = 480 // "ALL SYSTEMS READY" hold
-const WELCOME_MS = 370 // "WELCOME TO MY WORKSPACE" hold
-const TOTAL_MS = SCRIPT_MS + SYSTEMS_MS + WELCOME_MS
+const timing = (fast: boolean) => {
+  const script = fast ? 1900 : 4150 // animated boot (bars + rolling messages)
+  const systems = fast ? 340 : 480 // "ALL SYSTEMS READY" hold
+  const welcome = fast ? 400 : 370 // final line hold
+  return { script, systems, welcome, total: script + systems + welcome }
+}
 
 /* Non-linear overall progress: quick early movement, tiny pauses, final jump.
    Values are read as a smooth curve between control points (fraction -> %). */
@@ -72,10 +75,19 @@ function pickMode(): Mode {
   return 'full'
 }
 
-export function BootScreen({ onDone }: { onDone: () => void }) {
+export function BootScreen({
+  onDone,
+  fast = false,
+  session = 1,
+}: {
+  onDone: () => void
+  fast?: boolean
+  session?: number
+}) {
   const [mode] = useState<Mode>(pickMode)
   const [elapsed, setElapsed] = useState(0)
   const doneRef = useRef(false)
+  const t = timing(fast)
 
   useEffect(() => {
     const finish = () => {
@@ -85,8 +97,8 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
     }
 
     if (mode === 'reduced') {
-      const t = setTimeout(finish, 900)
-      return () => clearTimeout(t)
+      const timer = setTimeout(finish, 800)
+      return () => clearTimeout(timer)
     }
 
     let raf = 0
@@ -94,7 +106,7 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
     const tick = (now: number) => {
       const e = now - start
       setElapsed(e)
-      if (e >= TOTAL_MS) {
+      if (e >= t.total) {
         finish()
         return
       }
@@ -102,14 +114,14 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [mode, onDone])
+  }, [mode, onDone, t.total])
 
-  const frac = clamp(elapsed / SCRIPT_MS)
+  const frac = clamp(elapsed / t.script)
   const overall = Math.round(curve(OVERALL, frac))
   const phase =
-    elapsed < SCRIPT_MS
+    elapsed < t.script
       ? 'boot'
-      : elapsed < SCRIPT_MS + SYSTEMS_MS
+      : elapsed < t.script + t.systems
         ? 'systems'
         : 'welcome'
 
@@ -121,11 +133,13 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
 
   const bootMsg =
     [...MESSAGES].reverse().find((m) => frac >= m.at)?.text ?? MESSAGES[0].text
+  const welcomeLine =
+    session > 1 ? `WELCOME BACK · SESSION #${session}` : 'WELCOME TO MY WORKSPACE'
   const line =
     phase === 'systems'
       ? 'ALL SYSTEMS READY'
       : phase === 'welcome'
-        ? 'WELCOME TO MY WORKSPACE'
+        ? welcomeLine
         : bootMsg
 
   return (
@@ -232,7 +246,7 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
           <div className="mt-10">
             <Segments value={100} ready />
             <p className="mt-3.5 text-center font-mono text-[12px] text-desk-muted">
-              Loading workspace…
+              {session > 1 ? 'Welcome back…' : 'Loading workspace…'}
             </p>
           </div>
         )}

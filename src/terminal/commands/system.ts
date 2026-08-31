@@ -97,6 +97,32 @@ const status: CommandDef = {
   },
 }
 
+const forget: CommandDef = {
+  name: 'forget',
+  summary: 'clear what the site remembers about you',
+  usage: 'forget me',
+  run: (ctx) => {
+    if (ctx.args[0]?.toLowerCase() !== 'me') {
+      return { lines: [{ kind: 'muted', text: 'Usage: forget me' }] }
+    }
+    ctx.forgetMe()
+    return {
+      theme: 'dark',
+      lines: [
+        { kind: 'system', text: 'Done. Cleared:' },
+        {
+          kind: 'muted',
+          text: '  visit history · achievements · theme · window layout · icon positions',
+        },
+        {
+          kind: 'muted',
+          text: 'Game saves and your login are untouched. Reload for a fully clean slate.',
+        },
+      ],
+    }
+  },
+}
+
 const stats: CommandDef = {
   name: 'stats',
   summary: 'session stats',
@@ -171,6 +197,7 @@ export const systemCommands: CommandDef[] = [
   theme,
   status,
   stats,
+  forget,
   achievements,
   reboot,
   shutdown,

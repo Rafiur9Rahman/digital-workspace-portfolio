@@ -136,7 +136,7 @@ after the first command.
 | **window control** | `ps` (`top`, `htop`) · `apps` · `kill <app>` · `focus <app>` · `minimize <app>` · `desktop` (minimise all) |
 | **search** | `tree` (whole filesystem) · `find <term>` (file names) · `grep <term>` (`search`, portfolio content) · `file <path>` |
 | **git** | `git status` · `git log` · `git blame` · `git push` (denied) · `git commit -m "hire"` → opens Contact + *Root Access* |
-| **meta** | `alias` · `theme [dark\|matrix\|amber\|mono]` (persists) · `status` · `stats` · `history -c` · `clear --all` |
+| **meta** | `alias` · `theme [dark\|matrix\|amber\|mono]` (persists) · `status` · `stats` · `history -c` · `clear --all` · `forget me` (wipe the visitor record + achievements + theme + layout) |
 | **tools** | `base64 [-d] <text>` (UTF-8 safe, no eval) |
 | **portfolio nav** | `linkedin` · `source` (`repo`) · `credits` · `license` · `changelog` · `tour` (`recruiter`, `tour --fast`) |
 | **fun** | `joke` · `quote` (`motd`) · `calc <expr>` (safe, no eval) · `ping [host]` (`ping recruiter` opens Contact) |

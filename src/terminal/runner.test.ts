@@ -29,6 +29,7 @@ function baseCtx(over: Partial<BaseContext> = {}): BaseContext {
     minimizeApp: () => {},
     minimizeAll: () => {},
     clearHistory: () => {},
+    forgetMe: () => {},
     ...over,
   }
 }

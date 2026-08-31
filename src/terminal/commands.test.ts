@@ -32,6 +32,7 @@ function run(name: string, over: Partial<CommandContext> = {}): CommandResult | 
     minimizeApp: () => {},
     minimizeAll: () => {},
     clearHistory: () => {},
+    forgetMe: () => {},
     ...over,
   })
 }

@@ -73,6 +73,8 @@ export interface CommandContext {
   minimizeAll: () => void
   /** wipe the ↑/↓ command history for this session */
   clearHistory: () => void
+  /** clear everything the site remembers about this visitor */
+  forgetMe: () => void
 }
 
 export interface CommandDef {

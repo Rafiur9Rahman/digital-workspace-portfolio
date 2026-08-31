@@ -37,6 +37,7 @@ export interface SessionDeps {
   minimizeApp: (id: AppId) => void
   minimizeAll: () => void
   uptimeMs: () => number
+  forgetMe: () => void
 }
 
 export interface SessionState {
@@ -248,6 +249,7 @@ export function useTerminalSession(deps: SessionDeps) {
         minimizeApp: (id) => depsRef.current.minimizeApp(id),
         minimizeAll: () => depsRef.current.minimizeAll(),
         clearHistory: () => dispatch({ type: 'clearHistory' }),
+        forgetMe: () => depsRef.current.forgetMe(),
       })
       applyResult(result)
       const freshlyUnlocked = getProgress().unlocked.filter(

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { MenuBar } from './MenuBar'
 import { MatrixGlitch } from './MatrixGlitch'
+import { Greeting } from './Greeting'
 import { Dock } from './Dock'
 import { DesktopIcons } from './DesktopIcons'
 import { Launcher } from './Launcher'
@@ -31,6 +32,7 @@ export function Desktop() {
       {/* Window area sits between menu bar and screen bottom */}
       <div ref={areaRef} className="absolute inset-x-0 bottom-0 top-8">
         <Launcher />
+        <Greeting />
         <DesktopIcons deskW={size.w} deskH={size.h} />
         {/* Windows stay mounted while minimised (Window.tsx hides them) so their
             state — a running emulator, terminal history — survives. */}

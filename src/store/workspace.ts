@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { useWindows } from './windows'
+import { recordVisit, type VisitInfo } from '../lib/visitor'
 
 export type WorkspacePower = 'booting' | 'running' | 'shutdown'
 
@@ -7,6 +8,8 @@ interface WorkspaceStore {
   power: WorkspacePower
   /** when this browser session started — for `uptime` / `neofetch` */
   startedAt: number
+  /** first-visit vs returning, recorded once at load */
+  visit: VisitInfo
   /** replay the cinematic boot, landing on a clean desktop */
   reboot: () => void
   /** fake OS power-off — ShutdownScreen owns the screen until powerOn/reboot */
@@ -22,6 +25,7 @@ interface WorkspaceStore {
 export const useWorkspace = create<WorkspaceStore>((set) => ({
   power: 'booting',
   startedAt: Date.now(),
+  visit: recordVisit(),
   reboot: () => {
     useWindows.getState().closeAll()
     set({ power: 'booting' })

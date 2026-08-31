@@ -10,6 +10,14 @@ import { portfolioFs } from '../terminal/filesystem'
 import type { TerminalTheme } from '../terminal/prefs'
 import { promptFor, useTerminalSession } from '../terminal/useTerminalSession'
 import type { LineKind, OutputLine } from '../terminal/types'
+import { forgetVisitor } from '../lib/visitor'
+
+const FORGET_KEYS = [
+  'ws-terminal-v1',
+  'ws-terminal-prefs-v1',
+  'ws-window-layout-v1',
+  'ws-icons-v1',
+]
 
 /* Themes swap CSS variables on the terminal root; everything below reads them.
    Green (--tk) still means success / status. */
@@ -69,6 +77,7 @@ export function TerminalApp() {
   const reboot = useWorkspace((s) => s.reboot)
   const shutdown = useWorkspace((s) => s.shutdown)
   const startedAt = useWorkspace((s) => s.startedAt)
+  const isFirstVisit = useWorkspace((s) => s.visit.isFirstVisit)
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -98,6 +107,19 @@ export function TerminalApp() {
     },
     minimizeAll: () => {
       for (const w of windows) if (!w.minimized) minimizeWin(w.id)
+    },
+    forgetMe: () => {
+      for (const key of FORGET_KEYS) {
+        try {
+          localStorage.removeItem(key)
+        } catch {
+          /* ignore */
+        }
+      }
+      forgetVisitor()
+      useWorkspace.setState({
+        visit: { isFirstVisit: true, visits: 0, previousVisit: null },
+      })
     },
   })
 
@@ -189,11 +211,24 @@ export function TerminalApp() {
         className="desk-scroll h-full overflow-auto px-4 py-3"
       >
         <div className="mb-3 border-b border-[var(--td)]/25 pb-2.5">
-          <p className="text-[var(--tf)]">Welcome to the terminal.</p>
-          <p className="mt-0.5 text-[12px] text-[var(--td)]">
-            Only use this if you&rsquo;re comfortable with a command line. Type{' '}
-            <span className="text-[var(--tk)]">help</span> to get started.
-          </p>
+          {isFirstVisit ? (
+            <>
+              <p className="text-[var(--tf)]">Welcome to the terminal.</p>
+              <p className="mt-0.5 text-[12px] text-[var(--td)]">
+                Only use this if you&rsquo;re comfortable with a command line. Type{' '}
+                <span className="text-[var(--tk)]">help</span> to get started.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-[var(--tf)]">Welcome back.</p>
+              <p className="mt-0.5 text-[12px] text-[var(--td)]">
+                <span className="text-[var(--tk)]">help</span> for commands ·{' '}
+                <span className="text-[var(--tk)]">stats</span> for your history ·{' '}
+                <span className="text-[var(--tk)]">achievements</span> for what you&rsquo;ve found.
+              </p>
+            </>
+          )}
         </div>
 
         {state.lines.map((line, i) => (

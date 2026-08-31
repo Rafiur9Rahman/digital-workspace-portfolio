@@ -29,6 +29,7 @@ function ctx(over: Partial<CommandContext> = {}): CommandContext {
     minimizeApp: () => {},
     minimizeAll: () => {},
     clearHistory: () => {},
+    forgetMe: () => {},
     ...over,
   }
 }
@@ -189,6 +190,18 @@ describe('meta', () => {
   })
   it('launch is an alias of open', () => {
     expect(getCommand('launch')?.name).toBe('open')
+  })
+  it('forget me calls ctx.forgetMe and resets the theme', async () => {
+    const forgetMe = vi.fn()
+    const result = await run('forget', { args: ['me'], forgetMe })
+    expect(forgetMe).toHaveBeenCalledOnce()
+    expect(result).toMatchObject({ theme: 'dark' })
+    expect(textOf(result)).toContain('Cleared')
+  })
+  it('bare `forget` shows usage and does nothing', async () => {
+    const forgetMe = vi.fn()
+    expect(textOf(await run('forget', { forgetMe }))).toContain('Usage: forget me')
+    expect(forgetMe).not.toHaveBeenCalled()
   })
   it('tour --fast prints a summary without opening apps', async () => {
     const openApp = vi.fn()
