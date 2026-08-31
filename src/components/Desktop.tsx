@@ -12,7 +12,10 @@ import { useWindows } from '../store/windows'
 export function Desktop() {
   const windows = useWindows((s) => s.windows)
   const areaRef = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState({ w: 1200, h: 800 })
+  const [size, setSize] = useState(() => ({
+    w: typeof window === 'undefined' ? 1200 : window.innerWidth,
+    h: typeof window === 'undefined' ? 800 : Math.max(200, window.innerHeight - 32),
+  }))
 
   useEffect(() => {
     const measure = () => {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue } from 'framer-motion'
 import { useWindows } from '../store/windows'
+import { useWorkspace } from '../store/workspace'
 import type { AppId } from '../data/apps'
 
 interface DeskIcon {
@@ -17,36 +18,38 @@ const ICONS: DeskIcon[] = [
   { id: 'about', label: 'About the Author', glyph: '👤', app: 'about' },
   // { id: 'projects', label: 'Projects', glyph: '📁', app: 'projects' },
   // { id: 'resume', label: 'resume.pdf', glyph: '📄', app: 'resume' },
-  { id: 'images', label: 'Images', glyph: '📁', app: 'images', big: true },
+  { id: 'images', label: 'Images', glyph: '📁', app: 'images' },
   { id: 'gba', label: 'Game Boy Advance', glyph: '🎮', app: 'gba' },
   // { id: 'photo', label: 'profile.jpg', glyph: '🖼️', app: 'photo' },
   // { id: 'contact', label: 'contact.txt', glyph: '📝', app: 'contact' },
   // { id: 'assistant', label: 'AI Assistant', glyph: '✨', app: 'assistant' },
 ]
 
-/* Default spots, as fractions of the desktop - a neat column down the left,
-   clear of the dock. Users can drag them anywhere and the new spot is
-   remembered. Keep one entry per icon in ICONS. */
-const DEFAULTS: Record<string, { x: number; y: number }> = {
-  about: { x: 0.02, y: 0.03 },
-  // projects: { x: 0.02, y: 0.19 },
-  // resume: { x: 0.02, y: 0.35 },
-  images: { x: 0.02, y: 0.19 },
-  gba: { x: 0.02, y: 0.35 },
-  // photo: { x: 0.02, y: 0.51 },
-  // contact: { x: 0.02, y: 0.67 },
-  // assistant: { x: 0.02, y: 0.83 },
-}
+/* The default layout is a tidy column hugging the left edge. Positions are
+   stored as fractions of the desktop (so they hold up on resize) but the
+   defaults are derived from fixed pixel spacing. Users drag icons anywhere
+   and the new spot is remembered. */
+const COL_LEFT = 10 // px from the screen edge to the icon cell
+const COL_TOP = 10 // px from the top of the icon area
+const COL_STEP = 108 // px between icons in the column
 
 const STORE_KEY = 'ws-icons-v2'
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
 
 type PosMap = Record<string, { x: number; y: number }>
 
-function loadPositions(): PosMap {
-  // Seed defaults for the icons that currently exist.
+function defaultFrac(index: number, deskW: number, deskH: number) {
+  return {
+    x: COL_LEFT / Math.max(deskW, 1),
+    y: (COL_TOP + index * COL_STEP) / Math.max(deskH, 1),
+  }
+}
+
+function loadPositions(deskW: number, deskH: number): PosMap {
   const current: PosMap = {}
-  for (const icon of ICONS) current[icon.id] = DEFAULTS[icon.id]
+  ICONS.forEach((icon, i) => {
+    current[icon.id] = defaultFrac(i, deskW, deskH)
+  })
 
   try {
     const raw = localStorage.getItem(STORE_KEY)
@@ -57,7 +60,6 @@ function loadPositions(): PosMap {
         if (id in current) current[id] = pos
         else hadStale = true // position for an icon that no longer exists
       }
-      // Rewrite storage without the stale entries.
       if (hadStale) localStorage.setItem(STORE_KEY, JSON.stringify(current))
     }
   } catch {
@@ -68,8 +70,27 @@ function loadPositions(): PosMap {
 
 export function DesktopIcons({ deskW, deskH }: { deskW: number; deskH: number }) {
   const openApp = useWindows((s) => s.openApp)
+  const visit = useWorkspace((s) => s.visit)
   const [selected, setSelected] = useState<string | null>(null)
-  const [positions, setPositions] = useState(loadPositions)
+  const [positions, setPositions] = useState(() => loadPositions(deskW, deskH))
+
+  // Keep the current size reachable without making it re-seed on every resize.
+  const sizeRef = useRef({ deskW, deskH })
+  useEffect(() => {
+    sizeRef.current = { deskW, deskH }
+  }, [deskW, deskH])
+
+  // `forget me` in the terminal resets the visitor record - snap icons back
+  // to the default column too.
+  const firstRun = useRef(true)
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false
+      return
+    }
+    setPositions(loadPositions(sizeRef.current.deskW, sizeRef.current.deskH))
+    setSelected(null)
+  }, [visit])
 
   const savePosition = useCallback((id: string, x: number, y: number) => {
     setPositions((prev) => {
@@ -103,13 +124,13 @@ export function DesktopIcons({ deskW, deskH }: { deskW: number; deskH: number })
 
   return (
     <div className="absolute inset-0" onClick={() => setSelected(null)}>
-      {ICONS.map((icon) => (
+      {ICONS.map((icon, i) => (
         <DraggableIcon
           key={icon.id}
           icon={icon}
           deskW={deskW}
           deskH={deskH}
-          frac={positions[icon.id] ?? DEFAULTS[icon.id]}
+          frac={positions[icon.id] ?? defaultFrac(i, deskW, deskH)}
           selected={selected === icon.id}
           onSelect={() => setSelected(icon.id)}
           onOpen={() => openApp(icon.app)}
@@ -161,8 +182,8 @@ function DraggableIcon({
   onOpen: () => void
   onMoved: (id: string, x: number, y: number) => void
 }) {
-  const boxW = icon.big ? 116 : 96
-  const boxH = icon.big ? 118 : 104
+  const boxW = icon.big ? 116 : 92
+  const boxH = icon.big ? 118 : 100
   const maxX = Math.max(0, deskW - boxW)
   const maxY = Math.max(0, deskH - boxH)
 

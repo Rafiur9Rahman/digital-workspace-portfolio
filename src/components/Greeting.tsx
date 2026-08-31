@@ -15,33 +15,33 @@ function bucketFor(hour: number): Bucket {
 }
 
 const FIRST: Record<Bucket, string> = {
-  night: 'Hello, night owl.',
-  morning: 'Good morning.',
-  afternoon: 'Good afternoon.',
-  evening: 'Good evening.',
+  night: 'Hey, night owl. Settling in?',
+  morning: 'Morning. Come on in.',
+  afternoon: 'Afternoon. Make yourself at home.',
+  evening: 'Evening. Welcome in.',
 }
 
 const RETURNING: Record<Bucket, string[]> = {
   night: [
-    'Hello again, night owl.',
-    'Welcome back. Late one tonight.',
-    'Back at this hour? Respect.',
-    'The workspace never sleeps. Apparently neither do you.',
+    'Hello again, night owl. How goes it?',
+    'Back at this hour? Late visit tonight?',
+    'Welcome back. Burning the midnight oil?',
+    'The workspace never sleeps. Do you?',
   ],
   morning: [
-    'Good morning, welcome back.',
     'Morning. Good to see you again.',
-    'Welcome back. Early start.',
+    'Welcome back. Early start today?',
+    'Back already? Morning to you.',
   ],
   afternoon: [
-    'Good afternoon, welcome back.',
-    'Welcome back.',
-    'Afternoon. Back for more?',
+    'Afternoon. Good to have you back.',
+    'Welcome back. How is the day treating you?',
+    'Back for another look? Good afternoon.',
   ],
   evening: [
-    'Good evening, welcome back.',
     'Evening. Good to see you again.',
-    'Welcome back.',
+    'Welcome back. Winding down for the day?',
+    'Back this evening? Good to have you.',
   ],
 }
 
