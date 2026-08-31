@@ -13,6 +13,7 @@ interface Props {
 const MIN_W = 300
 const MIN_H = 200
 const RESIZE_BREAKPOINT = 640 // below this width, windows aren't resizable
+const MOBILE_DOCK_CLEARANCE = 74 // px kept clear at the bottom for the dock
 
 type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 
@@ -23,24 +24,44 @@ export function Window({ win, deskW, deskH }: Props) {
   const { close, focus, minimize, toggleMaximize, move, resize } = useWindows()
   const dragControls = useDragControls()
 
-  const x = useMotionValue(win.x)
-  const y = useMotionValue(win.y)
-  const width = useMotionValue(win.width)
-  const height = useMotionValue(win.height)
-
   const canResize = deskW >= RESIZE_BREAKPOINT
+  const mobile = deskW < RESIZE_BREAKPOINT
+
+  // On a phone every window fills the screen (minus the dock). The stored
+  // desktop bounds are left untouched for when the viewport grows back.
+  const bounds = mobile
+    ? {
+        x: 0,
+        y: 0,
+        width: deskW,
+        height: Math.max(MIN_H, deskH - MOBILE_DOCK_CLEARANCE),
+      }
+    : { x: win.x, y: win.y, width: win.width, height: win.height }
+
+  // The front-most open window is the only one shown on mobile; the rest stay
+  // mounted (so a running emulator / terminal history survives) but hidden.
+  const topId = useWindows((s) => {
+    const open = s.windows.filter((w) => !w.minimized)
+    return open.length ? open.reduce((a, b) => (b.z > a.z ? b : a)).id : null
+  })
+  const suppressed = win.minimized || (mobile && win.id !== topId)
+
+  const x = useMotionValue(bounds.x)
+  const y = useMotionValue(bounds.y)
+  const width = useMotionValue(bounds.width)
+  const height = useMotionValue(bounds.height)
 
   // Keep the transform / size in sync when they change from outside a drag or
   // resize (opening, maximizing, un-maximizing, applying a saved layout).
   useEffect(() => {
-    x.set(win.x)
-    y.set(win.y)
-  }, [win.x, win.y, x, y])
+    x.set(bounds.x)
+    y.set(bounds.y)
+  }, [bounds.x, bounds.y, x, y])
 
   useEffect(() => {
-    width.set(win.width)
-    height.set(win.height)
-  }, [win.width, win.height, width, height])
+    width.set(bounds.width)
+    height.set(bounds.height)
+  }, [bounds.width, bounds.height, width, height])
 
   // Restore the last size/position this app was left at (once, desktop only).
   const appliedRef = useRef(false)
@@ -131,7 +152,7 @@ export function Window({ win, deskW, deskH }: Props) {
 
   return (
     <motion.div
-      drag={!win.maximized}
+      drag={!win.maximized && !mobile}
       dragControls={dragControls}
       dragListener={false}
       dragMomentum={false}
@@ -146,11 +167,15 @@ export function Window({ win, deskW, deskH }: Props) {
         move(win.id, x.get(), y.get())
         persist()
       }}
-      aria-hidden={win.minimized || undefined}
+      aria-hidden={suppressed || undefined}
       initial={{ opacity: 0, scale: 0.96 }}
       animate={
-        win.minimized
-          ? { opacity: 0, scale: 0.9, transitionEnd: { visibility: 'hidden' } }
+        suppressed
+          ? {
+              opacity: 0,
+              scale: win.minimized ? 0.9 : 1,
+              transitionEnd: { visibility: 'hidden' },
+            }
           : { opacity: 1, scale: 1, visibility: 'visible' }
       }
       exit={{ opacity: 0, scale: 0.96 }}
@@ -164,32 +189,49 @@ export function Window({ win, deskW, deskH }: Props) {
         position: 'absolute',
         top: 0,
         left: 0,
-        pointerEvents: win.minimized ? 'none' : undefined,
+        pointerEvents: suppressed ? 'none' : undefined,
       }}
-      className="flex flex-col overflow-hidden rounded-xl border border-desk-edge bg-desk-panel shadow-2xl shadow-black/40"
+      className={`flex flex-col overflow-hidden bg-desk-panel ${
+        mobile
+          ? 'border-b border-desk-edge'
+          : 'rounded-xl border border-desk-edge shadow-2xl shadow-black/40'
+      }`}
     >
       <div
         onPointerDown={(e) => {
-          if (!win.maximized) dragControls.start(e)
+          if (!win.maximized && !mobile) dragControls.start(e)
         }}
-        onDoubleClick={() => toggleMaximize(win.id, deskW, deskH)}
-        className="flex h-8 shrink-0 select-none items-center gap-2 border-b border-desk-edge bg-desk-bg/50 px-3"
-        style={{ cursor: win.maximized ? 'default' : 'grab' }}
+        onDoubleClick={() => {
+          if (!mobile) toggleMaximize(win.id, deskW, deskH)
+        }}
+        className={`flex shrink-0 select-none items-center gap-2 border-b border-desk-edge bg-desk-bg/50 px-3 ${
+          mobile ? 'h-11' : 'h-8'
+        }`}
+        style={{ cursor: win.maximized || mobile ? 'default' : 'grab' }}
       >
-        <div className="group/tl flex items-center gap-2">
-          <TrafficLight color="red" symbol="✕" label="Close" onClick={() => close(win.id)} />
+        <div className={`group/tl flex items-center ${mobile ? 'gap-3' : 'gap-2'}`}>
+          <TrafficLight
+            color="red"
+            symbol="✕"
+            label="Close"
+            big={mobile}
+            onClick={() => close(win.id)}
+          />
           <TrafficLight
             color="yellow"
             symbol="−"
             label="Minimize"
+            big={mobile}
             onClick={() => minimize(win.id)}
           />
-          <TrafficLight
-            color="green"
-            symbol={win.maximized ? '−' : '+'}
-            label={win.maximized ? 'Restore' : 'Maximize'}
-            onClick={() => toggleMaximize(win.id, deskW, deskH)}
-          />
+          {!mobile && (
+            <TrafficLight
+              color="green"
+              symbol={win.maximized ? '−' : '+'}
+              label={win.maximized ? 'Restore' : 'Maximize'}
+              onClick={() => toggleMaximize(win.id, deskW, deskH)}
+            />
+          )}
         </div>
 
         <span className="ml-1 text-[13px] leading-none">{app.icon}</span>
@@ -263,12 +305,26 @@ function TrafficLight({
   symbol,
   label,
   onClick,
+  big,
 }: {
   color: 'red' | 'yellow' | 'green'
   symbol: string
   label: string
   onClick: () => void
+  big?: boolean
 }) {
+  // On touch there is no hover, so the bigger targets show their glyph always.
+  if (big) {
+    return (
+      <button
+        aria-label={label}
+        onClick={onClick}
+        className={`grid h-7 w-7 place-items-center rounded-full leading-none text-black/60 transition active:brightness-90 ${TL_BG[color]}`}
+      >
+        <span className="text-[11px] font-bold">{symbol}</span>
+      </button>
+    )
+  }
   return (
     <button
       aria-label={label}

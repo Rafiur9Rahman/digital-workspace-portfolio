@@ -10,10 +10,10 @@ export function Launcher() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.5 }}
       >
-        <h1 className="text-4xl font-semibold tracking-tight text-desk-text [text-shadow:0_2px_24px_rgba(0,0,0,0.5)]">
+        <h1 className="text-3xl font-semibold tracking-tight text-desk-text [text-shadow:0_2px_24px_rgba(0,0,0,0.5)] sm:text-4xl">
           {profile.name}
         </h1>
-        <p className="mt-2 text-sm tracking-wide text-desk-muted">
+        <p className="mt-2 text-xs tracking-wide text-desk-muted sm:text-sm">
           {profile.title}
         </p>
       </motion.div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useWorkspace } from '../store/workspace'
+import { useWindows } from '../store/windows'
 import type { VisitInfo } from '../lib/visitor'
 
 type Bucket = 'night' | 'morning' | 'afternoon' | 'evening'
@@ -64,6 +65,7 @@ function greetingFor(visit: VisitInfo): GreetingText {
 export function Greeting() {
   const power = useWorkspace((s) => s.power)
   const visit = useWorkspace((s) => s.visit)
+  const hasWindows = useWindows((s) => s.windows.length > 0)
   const reduce = useReducedMotion()
   const [visible, setVisible] = useState(true)
   const [text] = useState(() => greetingFor(visit))
@@ -78,7 +80,9 @@ export function Greeting() {
 
   return (
     <AnimatePresence>
-      {visible && (
+      {/* The greeting welcomes the empty desktop; once an app is open it would
+          just sit on top of the window, so it fades away. */}
+      {visible && !hasWindows && (
         <motion.div
           initial={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}

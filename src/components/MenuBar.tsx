@@ -29,7 +29,7 @@ export function MenuBar() {
 
   return (
     <>
-      <div className="absolute inset-x-0 top-0 z-40 flex h-8 items-center gap-3 border-b border-desk-edge bg-desk-panel/70 px-3 text-xs text-desk-muted backdrop-blur">
+      <div className="absolute inset-x-0 top-0 z-40 flex h-[calc(2rem+env(safe-area-inset-top))] items-center gap-3 border-b border-desk-edge bg-desk-panel/70 px-3 pt-[env(safe-area-inset-top)] text-xs text-desk-muted backdrop-blur">
         <span className="font-semibold text-desk-text">◆ Workspace</span>
 
         <div ref={menuRef} className="relative">

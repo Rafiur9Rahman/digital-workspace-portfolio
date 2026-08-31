@@ -30,7 +30,10 @@ export function Desktop() {
       <MenuBar />
 
       {/* Window area sits between menu bar and screen bottom */}
-      <div ref={areaRef} className="absolute inset-x-0 bottom-0 top-8">
+      <div
+        ref={areaRef}
+        className="absolute inset-x-0 bottom-0 top-[calc(2rem+env(safe-area-inset-top))]"
+      >
         <Launcher />
         <Greeting />
         <DesktopIcons deskW={size.w} deskH={size.h} />

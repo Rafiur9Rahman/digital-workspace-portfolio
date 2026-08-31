@@ -6,6 +6,9 @@ html,
 body,
 #root {
   height: 100%;
+  /* Track the visible viewport on mobile so the URL bar showing / hiding does
+     not clip the desktop or leave a gap under the dock. */
+  height: 100dvh;
 }
 
 body {
@@ -14,6 +17,15 @@ body {
   color: #e6ecff;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
+}
+
+/* Horizontal app switcher on mobile - scrolls without a visible scrollbar. */
+.dock-scroll {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.dock-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* Thin scrollbars inside windows */
