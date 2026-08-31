@@ -20,7 +20,7 @@ export function Dock() {
       <div
         className={`dock-scroll pointer-events-auto flex items-center rounded-2xl border border-desk-edge bg-desk-panel/80 shadow-lg shadow-black/40 backdrop-blur-xl ${
           mobile
-            ? 'w-full max-w-[520px] gap-1 overflow-x-auto px-2 py-1.5'
+            ? 'max-w-full gap-1 overflow-x-auto px-2 py-1.5'
             : 'gap-3 px-4 py-2.5'
         }`}
       >
