@@ -75,7 +75,7 @@ export function MatrixRain({ onExit }: { onExit: () => void }) {
     <div
       role="presentation"
       onClick={onExit}
-      className="absolute inset-0 z-10 cursor-pointer bg-desk-bg"
+      className="absolute inset-0 z-10 cursor-pointer bg-[var(--tb,#0b1020)]"
     >
       {reduce ? (
         <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center font-mono text-xs">

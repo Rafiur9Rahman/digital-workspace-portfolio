@@ -1,6 +1,9 @@
 import type { AppId } from '../data/appMeta'
 import type { AchievementId } from './achievements'
 import type { FileSystem } from './filesystem'
+import type { TerminalTheme } from './prefs'
+
+export type { TerminalTheme }
 
 export type LineKind = 'input' | 'output' | 'error' | 'system' | 'muted' | 'accent'
 
@@ -9,7 +12,7 @@ export interface OutputLine {
   text: string
 }
 
-export type TerminalEffect = 'matrix' | 'party'
+export type TerminalEffect = 'matrix' | 'party' | 'snake'
 
 export interface TerminalWindow {
   appId: AppId
@@ -28,6 +31,7 @@ export type CommandResult =
       clear?: boolean
       cwd?: string
       effect?: TerminalEffect
+      theme?: TerminalTheme
     }
 
 export interface CommandContext {
@@ -51,6 +55,8 @@ export interface CommandContext {
   reducedMotion: boolean
   /** ms since the workspace session started */
   uptimeMs: number
+  /** the active terminal theme */
+  terminalTheme: TerminalTheme
 
   // --- controlled OS actions: commands never touch React or the DOM directly ---
   openApp: (id: AppId) => void

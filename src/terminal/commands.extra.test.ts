@@ -15,6 +15,7 @@ function ctx(over: Partial<CommandContext> = {}): CommandContext {
     print: () => {},
     signal: new AbortController().signal,
     reducedMotion: true,
+    terminalTheme: 'dark',
     uptimeMs: 90_000,
     openApp: () => {},
     openUrl: () => {},
@@ -115,6 +116,34 @@ describe('search', () => {
   })
   it('file identifies a pdf', async () => {
     expect(await run('file', { args: ['cv.pdf'] })).toBe('cv.pdf: PDF document')
+  })
+})
+
+describe('base64', () => {
+  it('round-trips text', async () => {
+    const encoded = String(await run('base64', { args: ['hello world'] }))
+    expect(encoded).toBe('aGVsbG8gd29ybGQ=')
+    expect(await run('base64', { args: ['-d', encoded] })).toBe('hello world')
+  })
+  it('handles unicode', async () => {
+    const encoded = String(await run('base64', { args: ['héllo →'] }))
+    expect(await run('base64', { args: ['-d', encoded] })).toBe('héllo →')
+  })
+  it('errors on invalid base64', async () => {
+    expect(textOf(await run('base64', { args: ['-d', '!!!not-b64!!!'] }))).toContain('invalid')
+  })
+})
+
+describe('theme', () => {
+  it('reports the current theme when given no argument', async () => {
+    expect(String(await run('theme', { terminalTheme: 'amber' }))).toContain('amber')
+  })
+  it('sets a known theme', async () => {
+    const result = await run('theme', { args: ['matrix'] })
+    expect(result).toMatchObject({ theme: 'matrix' })
+  })
+  it('rejects an unknown theme', async () => {
+    expect(textOf(await run('theme', { args: ['neon'] }))).toContain("unknown theme 'neon'")
   })
 })
 

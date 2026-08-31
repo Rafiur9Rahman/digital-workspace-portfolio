@@ -15,6 +15,7 @@ function baseCtx(over: Partial<BaseContext> = {}): BaseContext {
     print: () => {},
     signal: new AbortController().signal,
     reducedMotion: true,
+    terminalTheme: 'dark',
     uptimeMs: 0,
     openApp: () => {},
     openUrl: () => {},

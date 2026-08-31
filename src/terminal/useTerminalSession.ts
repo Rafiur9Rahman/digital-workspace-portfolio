@@ -9,11 +9,22 @@ import type {
 import { listCommands } from './registry'
 import { runLine } from './runner'
 import { portfolioFs } from './filesystem'
+import { bumpCommandCount, loadPrefs, savePrefs, type TerminalTheme } from './prefs'
 import {
   getProgress,
   unlock as unlockAchievement,
   type AchievementId,
 } from './achievements'
+
+const ANOMALIES = [
+  'A cosmic ray flipped a bit somewhere. Probably fine.',
+  'kernel: reticulating splines...',
+  'A wild semicolon appeared. It was not needed.',
+  'The terminal briefly considered becoming a spreadsheet.',
+  'Someone wrote this feature at 3am. It shows.',
+  'entropy pool topped up.',
+  'That command was witnessed by exactly zero people.',
+]
 
 export interface SessionDeps {
   openApp: (id: AppId) => void
@@ -38,6 +49,7 @@ export interface SessionState {
   cwd: string
   effect: TerminalEffect | null
   running: boolean
+  theme: TerminalTheme
   /** queue of achievements to announce, oldest first */
   toasts: AchievementId[]
 }
@@ -50,6 +62,7 @@ export const INITIAL_SESSION: SessionState = {
   cwd: '/',
   effect: null,
   running: false,
+  theme: 'dark',
   toasts: [],
 }
 
@@ -66,6 +79,7 @@ export type SessionAction =
   | { type: 'toast'; ids: AchievementId[] }
   | { type: 'dismissToast' }
   | { type: 'clearHistory' }
+  | { type: 'setTheme'; theme: TerminalTheme }
 
 export function reducer(state: SessionState, action: SessionAction): SessionState {
   switch (action.type) {
@@ -87,6 +101,8 @@ export function reducer(state: SessionState, action: SessionAction): SessionStat
       return { ...state, toasts: state.toasts.slice(1) }
     case 'clearHistory':
       return { ...state, submitted: [], histCursor: 0 }
+    case 'setTheme':
+      return { ...state, theme: action.theme }
     case 'pushSubmitted':
       return {
         ...state,
@@ -129,7 +145,10 @@ function prefersReducedMotion(): boolean {
 }
 
 export function useTerminalSession(deps: SessionDeps) {
-  const [state, dispatch] = useReducer(reducer, INITIAL_SESSION)
+  const [state, dispatch] = useReducer(reducer, INITIAL_SESSION, (initial) => ({
+    ...initial,
+    theme: loadPrefs().theme,
+  }))
 
   const stateRef = useRef(state)
   const depsRef = useRef(deps)
@@ -162,6 +181,10 @@ export function useTerminalSession(deps: SessionDeps) {
     if (result.lines?.length) dispatch({ type: 'append', lines: result.lines })
     if (result.cwd) dispatch({ type: 'setCwd', cwd: result.cwd })
     if (result.effect) dispatch({ type: 'setEffect', effect: result.effect })
+    if (result.theme) {
+      dispatch({ type: 'setTheme', theme: result.theme })
+      savePrefs({ theme: result.theme })
+    }
   }, [])
 
   const submit = useCallback(async () => {
@@ -198,6 +221,7 @@ export function useTerminalSession(deps: SessionDeps) {
     const controller = new AbortController()
     controllersRef.current.push(controller)
     const unlockedBefore = new Set(getProgress().unlocked)
+    bumpCommandCount()
 
     try {
       const result = await runLine(raw, {
@@ -209,6 +233,7 @@ export function useTerminalSession(deps: SessionDeps) {
         signal: controller.signal,
         reducedMotion: prefersReducedMotion(),
         uptimeMs: depsRef.current.uptimeMs(),
+        terminalTheme: current.theme,
         openApp: (id) => depsRef.current.openApp(id),
         openUrl: (url) => depsRef.current.openUrl(url),
         reboot: () => depsRef.current.reboot(),
@@ -230,6 +255,18 @@ export function useTerminalSession(deps: SessionDeps) {
       )
       if (freshlyUnlocked.length) {
         dispatch({ type: 'toast', ids: freshlyUnlocked })
+      }
+      // Rare harmless flavour — repeat visitors occasionally see something odd.
+      if (Math.random() < 0.01) {
+        dispatch({
+          type: 'append',
+          lines: [
+            {
+              kind: 'muted',
+              text: `» ${ANOMALIES[Math.floor(Math.random() * ANOMALIES.length)]}`,
+            },
+          ],
+        })
       }
     } catch (error) {
       dispatch({

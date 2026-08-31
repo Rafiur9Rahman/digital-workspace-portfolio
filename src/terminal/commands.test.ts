@@ -18,6 +18,7 @@ function run(name: string, over: Partial<CommandContext> = {}): CommandResult | 
     print: () => {},
     signal: new AbortController().signal,
     reducedMotion: true,
+    terminalTheme: 'dark',
     uptimeMs: 0,
     openApp: () => {},
     openUrl: () => {},

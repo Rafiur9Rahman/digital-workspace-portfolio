@@ -1,5 +1,6 @@
-import type { CommandDef, OutputLine } from '../types'
+import type { CommandDef, OutputLine, TerminalTheme } from '../types'
 import { ACHIEVEMENTS, getProgress } from '../achievements'
+import { loadPrefs } from '../prefs'
 import { formatDuration } from '../util'
 
 const clear: CommandDef = {
@@ -53,13 +54,30 @@ const alias: CommandDef = {
   }),
 }
 
+const THEME_NAMES: TerminalTheme[] = ['dark', 'matrix', 'amber', 'mono']
+
 const theme: CommandDef = {
   name: 'theme',
-  summary: 'show the current theme',
-  run: (ctx) =>
-    ctx.args[0]
-      ? { lines: [{ kind: 'muted', text: "Only the 'dark' theme is available right now." }] }
-      : 'RafiurOS · dark',
+  summary: 'show or change the terminal theme',
+  usage: 'theme [dark|matrix|amber|mono]',
+  run: (ctx) => {
+    const name = ctx.args[0]?.toLowerCase()
+    if (!name) {
+      return `theme: ${ctx.terminalTheme}   ·   available: ${THEME_NAMES.join(', ')}`
+    }
+    if (!THEME_NAMES.includes(name as TerminalTheme)) {
+      return {
+        lines: [
+          { kind: 'error', text: `theme: unknown theme '${name}'` },
+          { kind: 'muted', text: `available: ${THEME_NAMES.join(', ')}` },
+        ],
+      }
+    }
+    return {
+      theme: name as TerminalTheme,
+      lines: [{ kind: 'system', text: `Theme set to ${name}.` }],
+    }
+  },
 }
 
 const status: CommandDef = {
@@ -84,11 +102,13 @@ const stats: CommandDef = {
   summary: 'session stats',
   run: (ctx) => {
     const progress = getProgress()
+    const prefs = loadPrefs()
     return {
       lines: [
-        { kind: 'output', text: `commands run   ${ctx.history.length}` },
-        { kind: 'output', text: `achievements   ${progress.unlocked.length}/${progress.total}` },
-        { kind: 'output', text: `uptime         ${formatDuration(ctx.uptimeMs)}` },
+        { kind: 'output', text: `commands (session)    ${ctx.history.length}` },
+        { kind: 'output', text: `commands (all time)   ${prefs.commandsRun}` },
+        { kind: 'output', text: `achievements          ${progress.unlocked.length}/${progress.total}` },
+        { kind: 'output', text: `uptime                ${formatDuration(ctx.uptimeMs)}` },
       ],
     }
   },

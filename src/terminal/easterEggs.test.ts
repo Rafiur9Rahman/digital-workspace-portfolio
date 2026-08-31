@@ -18,6 +18,7 @@ function ctx(over: Partial<CommandContext> = {}): CommandContext {
     print: () => {},
     signal: new AbortController().signal,
     reducedMotion: true,
+    terminalTheme: 'dark',
     uptimeMs: 0,
     openApp: () => {},
     openUrl: () => {},

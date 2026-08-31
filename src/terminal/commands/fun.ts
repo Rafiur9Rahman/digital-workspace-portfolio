@@ -119,6 +119,39 @@ const calc: CommandDef = {
   },
 }
 
+const base64: CommandDef = {
+  name: 'base64',
+  aliases: ['b64'],
+  summary: 'encode / decode base64',
+  usage: 'base64 [-d] <text>',
+  run: (ctx) => {
+    if (ctx.args.length === 0) {
+      return { lines: [{ kind: 'error', text: 'Usage: base64 [-d] <text>' }] }
+    }
+    const decode = ctx.args[0] === '-d' || ctx.args[0] === '--decode'
+    const text = ctx.args.slice(decode ? 1 : 0).join(' ')
+    if (!text) return { lines: [{ kind: 'error', text: 'Usage: base64 [-d] <text>' }] }
+    try {
+      if (decode) {
+        const bytes = Uint8Array.from(atob(text), (c) => c.charCodeAt(0))
+        return new TextDecoder().decode(bytes)
+      }
+      const bytes = new TextEncoder().encode(text)
+      let binary = ''
+      bytes.forEach((b) => {
+        binary += String.fromCharCode(b)
+      })
+      return btoa(binary)
+    } catch {
+      return {
+        lines: [
+          { kind: 'error', text: `base64: ${decode ? 'invalid base64 input' : 'could not encode'}` },
+        ],
+      }
+    }
+  },
+}
+
 const cowsay: CommandDef = {
   name: 'cowsay',
   summary: 'a cow says something',
@@ -229,6 +262,7 @@ export const funCommands: CommandDef[] = [
   coinflip,
   roll,
   calc,
+  base64,
   cowsay,
   ping,
   git,

@@ -172,6 +172,13 @@ const party: CommandDef = {
   }),
 }
 
+const snake: CommandDef = {
+  name: 'snake',
+  summary: 'play snake',
+  hidden: true,
+  run: () => ({ lines: [{ kind: 'muted', text: 'loading snake…' }], effect: 'snake' }),
+}
+
 export const easterEggCommands: CommandDef[] = [
   matrix,
   coffee,
@@ -182,4 +189,5 @@ export const easterEggCommands: CommandDef[] = [
   rm,
   pokemon,
   party,
+  snake,
 ]

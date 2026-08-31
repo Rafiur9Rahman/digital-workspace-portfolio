@@ -1,23 +1,63 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, type CSSProperties } from 'react'
 import { useWindows } from '../store/windows'
 import { useWorkspace } from '../store/workspace'
 import { ACHIEVEMENTS, unlock, type AchievementId } from '../terminal/achievements'
 import { complete } from '../terminal/autocomplete'
 import { MatrixRain, PartyBurst } from '../terminal/easterEggs/effects'
+import { Snake } from '../terminal/easterEggs/Snake'
 import { useKonami } from '../terminal/easterEggs/useKonami'
 import { portfolioFs } from '../terminal/filesystem'
+import type { TerminalTheme } from '../terminal/prefs'
 import { promptFor, useTerminalSession } from '../terminal/useTerminalSession'
 import type { LineKind, OutputLine } from '../terminal/types'
 
-/* Green is reserved for success / status; the rest is a calm terminal palette
-   (soft off-white body, blue paths, muted secondary). */
+/* Themes swap CSS variables on the terminal root; everything below reads them.
+   Green (--tk) still means success / status. */
+const THEMES: Record<
+  TerminalTheme,
+  { bg: string; fg: string; dim: string; accent: string; ok: string; err: string }
+> = {
+  dark: {
+    bg: '#0b1020',
+    fg: '#d7dcef',
+    dim: '#8b97b8',
+    accent: '#7aa2f7',
+    ok: '#34d399',
+    err: '#f87171',
+  },
+  matrix: {
+    bg: '#020a04',
+    fg: '#8dffb8',
+    dim: '#41a86e',
+    accent: '#38ff88',
+    ok: '#c9ffdb',
+    err: '#ff7a7a',
+  },
+  amber: {
+    bg: '#1a1200',
+    fg: '#ffc971',
+    dim: '#b08640',
+    accent: '#ffe0a3',
+    ok: '#ffdd99',
+    err: '#ff8a5c',
+  },
+  mono: {
+    bg: '#0d0d0d',
+    fg: '#d2d2d2',
+    dim: '#7a7a7a',
+    accent: '#ffffff',
+    ok: '#eaeaea',
+    err: '#ff9a9a',
+  },
+}
+
 const KIND_CLASS: Record<LineKind, string> = {
-  input: 'text-desk-muted',
-  output: 'text-[#d7dcef]',
-  error: 'text-red-400',
-  system: 'text-emerald-400',
-  muted: 'text-desk-muted/80',
-  accent: 'text-[#7aa2f7]',
+  input: 'text-[var(--td)]',
+  output: 'text-[var(--tf)]',
+  error: 'text-[var(--te)]',
+  system: 'text-[var(--tk)]',
+  muted: 'text-[var(--td)]/85',
+  accent: 'text-[var(--ta)]',
 }
 
 export function TerminalApp() {
@@ -82,12 +122,20 @@ export function TerminalApp() {
     if (unlock('konami-code')) dispatch({ type: 'toast', ids: ['konami-code'] })
   })
 
-  const clearEffect = () => {
+  const clearEffect = useCallback(() => {
     dispatch({ type: 'setEffect', effect: null })
     inputRef.current?.focus()
-  }
+  }, [dispatch])
+
+  const dismissParty = useCallback(
+    () => dispatch({ type: 'setEffect', effect: null }),
+    [dispatch],
+  )
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    // A full-screen effect (matrix / snake) owns the keyboard while it's up —
+    // let its own window listener handle everything, don't also nav history.
+    if (state.effect) return
     if (e.key === 'ArrowUp') {
       e.preventDefault()
       dispatch({ type: 'historyPrev' })
@@ -114,9 +162,21 @@ export function TerminalApp() {
     }
   }
 
+  const palette = THEMES[state.theme]
+  const themeVars = {
+    '--tb': palette.bg,
+    '--tf': palette.fg,
+    '--td': palette.dim,
+    '--ta': palette.accent,
+    '--tk': palette.ok,
+    '--te': palette.err,
+    backgroundColor: palette.bg,
+  } as CSSProperties
+
   return (
     <div
-      className="relative h-full overflow-hidden bg-desk-bg font-mono text-[13px] leading-relaxed selection:bg-emerald-400/25"
+      style={themeVars}
+      className="relative h-full overflow-hidden font-mono text-[13px] leading-relaxed selection:bg-white/15"
       onClick={() => {
         if (!window.getSelection()?.toString()) inputRef.current?.focus()
       }}
@@ -128,11 +188,11 @@ export function TerminalApp() {
         aria-label="Terminal output"
         className="desk-scroll h-full overflow-auto px-4 py-3"
       >
-        <div className="mb-3 border-b border-desk-edge/60 pb-2.5">
-          <p className="text-[#d7dcef]">Welcome to the terminal.</p>
-          <p className="mt-0.5 text-[12px] text-desk-muted">
+        <div className="mb-3 border-b border-[var(--td)]/25 pb-2.5">
+          <p className="text-[var(--tf)]">Welcome to the terminal.</p>
+          <p className="mt-0.5 text-[12px] text-[var(--td)]">
             Only use this if you&rsquo;re comfortable with a command line. Type{' '}
-            <span className="text-emerald-400">help</span> to get started.
+            <span className="text-[var(--tk)]">help</span> to get started.
           </p>
         </div>
 
@@ -158,15 +218,14 @@ export function TerminalApp() {
             autoComplete="off"
             autoCapitalize="off"
             aria-label="Terminal input"
-            className="min-w-0 flex-1 bg-transparent text-[#e6ecff] caret-emerald-400 outline-none"
+            className="min-w-0 flex-1 bg-transparent text-[var(--tf)] caret-[var(--tk)] outline-none"
           />
         </form>
       </div>
 
       {state.effect === 'matrix' && <MatrixRain onExit={clearEffect} />}
-      {state.effect === 'party' && (
-        <PartyBurst onExit={() => dispatch({ type: 'setEffect', effect: null })} />
-      )}
+      {state.effect === 'party' && <PartyBurst onExit={dismissParty} />}
+      {state.effect === 'snake' && <Snake onExit={clearEffect} />}
       {state.toasts[0] && <AchievementToast id={state.toasts[0]} />}
     </div>
   )
@@ -176,10 +235,10 @@ function Prompt({ cwd }: { cwd: string }) {
   const path = cwd === '/' ? '~' : `~${cwd}`
   return (
     <span className="shrink-0 select-none whitespace-pre">
-      <span className="text-emerald-400">visitor@rafiur</span>
-      <span className="text-desk-muted">:</span>
-      <span className="text-[#7aa2f7]">{path}</span>
-      <span className="text-desk-muted">{'$ '}</span>
+      <span className="text-[var(--tk)]">visitor@rafiur</span>
+      <span className="text-[var(--td)]">:</span>
+      <span className="text-[var(--ta)]">{path}</span>
+      <span className="text-[var(--td)]">{'$ '}</span>
     </span>
   )
 }
@@ -190,8 +249,8 @@ function TerminalLine({ line }: { line: OutputLine }) {
     if (i !== -1) {
       return (
         <pre className="whitespace-pre-wrap break-words">
-          <span className="text-emerald-400/70">{line.text.slice(0, i + 1)}</span>
-          <span className="text-desk-text/80">{line.text.slice(i + 1)}</span>
+          <span className="text-[var(--tk)]/70">{line.text.slice(0, i + 1)}</span>
+          <span className="text-[var(--tf)]/80">{line.text.slice(i + 1)}</span>
         </pre>
       )
     }
